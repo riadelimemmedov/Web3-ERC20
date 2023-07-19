@@ -1,4 +1,5 @@
 const hre = require("hardhat");
+const fs = require("fs");
 
 
 //!The 'main' function to deploy contract locally
@@ -26,7 +27,8 @@ async function main() {
 
    //Logging the address of the deployed contract
   console.log('Counter address ', await contract.address)
-
+  
+  const deployedContract = await setDeployContract(contract.interface.format('json'),contract.address,hre.network.name)
 
   //Get sender user addresss,well you know who deploy that is contract
   const receipt = await contract.deployTransaction.wait()// Line of code is waiting for the deployment transaction to be included in six blocks on the Ethereum blockchain. This is done to ensure that the transaction has sufficient confirmations, which helps to ensure the transaction will not be reversed.
@@ -69,3 +71,20 @@ const validateMain = async() => {
 
 //Call validateMain function and validate contract deploy or not
 validateMain()
+
+
+
+//!setDeployContract
+async function setDeployContract(abi,address,network) {
+  const contractData = {abi,address,'network':hre.network.name}
+  if(network == 'localhost'){
+    const filePath = "./data/MyTokenLocal.json"
+    fs.writeFileSync(filePath,JSON.stringify(contractData))
+    console.log('Our contract deployed --- LOCALHOST ---')
+  }
+  else{
+    const filePath = "./data/MyTokenProd.json"
+    fs.writeFileSync(filePath,JSON.stringify(contractData))
+    console.log('Our contract deployed --- PROD ---')
+  }
+}
