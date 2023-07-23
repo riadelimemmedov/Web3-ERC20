@@ -11,7 +11,6 @@ const MyTokenProd = require('../data/MyTokenProd.json')
 require('dotenv').config({path:"..//.env"})
 
 
-
 //*deployContract Prod
 // const deployContract = async () => {
 //     let contract;
@@ -65,4 +64,4 @@ const deployContract = async () => {
 
     return {contract,deployeNetwork,userBalance,signer}
 }
-module.exports = {Ethers,MyTokenLocal,MyTokenProd,deployContract}
+module.exports = {Ethers,ethers,MyTokenLocal,MyTokenProd,deployContract}

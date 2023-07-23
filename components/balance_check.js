@@ -5,7 +5,8 @@ import { useState,useEffect } from "react";
 
 //!Third Party Packages
 import { useMoralis } from "react-moralis";
-import {toast as toast_alert} from "react-hot-toast";
+import {toast, toast as toast_alert} from "react-hot-toast";
+
 
 
 //!Deployed Contracts
@@ -19,17 +20,30 @@ export default function CheckUserBalance () {
     const [address, setAddress] = useState("");
     const [balance, setBalance] = useState("");
     const [loading, setLoading] = useState(false)
+    const [isDisable,setIsDisable] = useState(false)
+
 
     //handleUserBalance
     const handleUserBalance = async () => {
+        const metamaskAddressRegex = /^(0x)?[0-9a-fA-F]{40}$/;
         try{
-            if(address){
+            if(metamaskAddressRegex.test(address)){
                 setLoading(true)
-                const contract = (await mytoken_contract.deployContract()).contract
-                const balance = await contract.balanceOf(address);
-                const formattedBalance = mytoken_contract.Ethers.utils.formatEther(balance)
-                setBalance(formattedBalance)
-                setLoading(false)
+                setTimeout(async(e) => {
+                    const contract = (await mytoken_contract.deployContract()).contract
+                    const balance = await contract.balanceOf(address);
+                    const formattedBalance = mytoken_contract.Ethers.utils.formatEther(balance)
+                    setBalance(formattedBalance)
+                    setLoading(false)
+                }, 5000);
+            }
+            else{
+                setLoading(true)
+                setTimeout(()=>{
+                    toast.error('Please input valid metamask addresss')
+                    setLoading(false)
+                    setBalance("")
+                },2000)
             }
         }
         catch(err){

@@ -4,7 +4,7 @@ import { useState,useEffect } from "react";
 
 //!Third Party Packages
 import { useMoralis } from "react-moralis";
-import {toast as toast_alert} from "react-hot-toast";
+import {toast, toast as toast_alert} from "react-hot-toast";
 
 
 
@@ -32,12 +32,25 @@ export default function TransferToken(){
 
     //handleInputValue
     const handleInputValue = (key) => (event) => {
-        if(formData.address.length > 0 && Number(formData.amount) > 0 && event.target.value != ''){
-            setIsDisable(false)
-        }
-        else if(formData.address == '' || Number(formData.amount) < 0 || event.target.value == ''){
+
+        const metamaskAddressRegex = /^(0x)?[0-9a-fA-F]{40}$/;
+        console.log('Work handleinput vlaue')
+        if(!metamaskAddressRegex.test(event.target.value) && event.target.id == 'address'){
+            console.log('Form data address is ', event.target.value)
+            toast.error('Please input valid metamask addresss')
             setIsDisable(true)
         }
+        else{
+            setIsDisable(false)
+        }
+        
+
+        // if(formData.address.length > 0 && Number(formData.amount) > 0 && event.target.value != ''){
+        //     setIsDisable(false)
+        // }
+        // else if(formData.address == '' || Number(formData.amount) < 0 || event.target.value == ''){
+        //     setIsDisable(true)
+        // }
         setFormData((prevState) => ({
             ...prevState,
             [key]:event.target.value
@@ -77,10 +90,10 @@ export default function TransferToken(){
     //return jsx
     return(
         <div className="text-center bg-light p-5 m-5 shadow">
-            <h1>Transfer MYT</h1>        
+            <h1>Transfer MYT From Contract Owner</h1>        
             <input type="text" className="form-control p-3 m-3 border-2 border-primary" id="address" placeholder="Wallet address" value={formData.address} onChange={handleInputValue('address')} required/>
             <input type="number" className="form-control p-3 m-3 border-2 border-primary" id="amount" placeholder="Amount of token" value={formData.amount} onChange={handleInputValue('amount')} required/>
-            <button type="button" onClick={handleTransfer} className="btn btn-primary col-3 p-3 m-3" disabled={loading}>
+            <button type="button" onClick={handleTransfer} className="btn btn-primary col-3 p-3 m-3" disabled={loading || !formData.address || !formData.amount || isDisable}>
                 {loading ? "Loading..." : "Transfer"}    
             </button>
         </div>  
