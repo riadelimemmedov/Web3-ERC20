@@ -54,6 +54,8 @@ export default function Transfer(){
                     window.localStorage.setItem('is_approved',true)
                     window.localStorage.setItem('approved_value',amount_approve.toString())
 
+                    console.log('Is approved value is ', isApproved)
+
                     await isApproved.wait()
 
                     toast_alert.success('Approved process completed successfully')
