@@ -20,6 +20,7 @@
   },
   "dependencies": {
     "@openzeppelin/contracts": "^4.9.2",
+    "axios": "^1.4.0",
     "dotenv": "^16.0.3",
     "ethers": "^5.7.2",
     "moralis-v1": "^1.13.0",

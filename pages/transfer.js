@@ -5,6 +5,7 @@ import { useState,useEffect } from "react";
 //!Third Party Packages
 import { useMoralis } from "react-moralis";
 import {toast, toast as toast_alert} from "react-hot-toast";
+import axios from 'axios'
 
 
 //!Deployed Contracts
@@ -30,6 +31,46 @@ export default function Transfer(){
 
 
 
+    const [isCompletedApprove,setCompletedApprove] = useState(false)
+    const [confirmedApproveAccount,setConfirmedApproveAccount] = useState()
+
+
+
+    const raiseAlertTransfer = (message) => {
+        setDisableTransfer(true)
+        setTimeout(() => {
+            setDisableTransfer(false)
+            toast_alert.error(`${message}`)
+        }, 3000);
+    }
+
+    const saveApprove = async (approvment_hash,confirmed_account,confirming_account,amount,confirmations) => {
+        await axios.post('http://127.0.0.1:8000/approve/create/',{
+            approvment_hash:approvment_hash,
+            confirmed_account:confirmed_account,
+            confirming_account:confirming_account,
+            amount:amount,
+            confirmations:confirmations
+        })
+        .then((response) => {
+            if(response.data){
+                setCompletedApprove(response.data.is_approve)
+                setConfirmedApproveAccount(response.data.confirmed_account)
+            }
+        })
+        .catch((err) => {
+            console.log('Encounter error when save approved to database ' , err)
+        })
+
+        console.log('Approvemtne hash ', approvment_hash)
+        console.log('Confirmed account ', confirmed_account)
+        console.log('Confirmining account ', confirming_account)
+        console.log('Approvemt amount ', amount)
+        console.log('Approvemtne confirmations ', confirmations)
+        return true
+    }
+
+
     //getContractInformation
     const getContractInformation = async()=>{
         const deployed_contract = await mytoken_contract.deployContract()
@@ -41,6 +82,7 @@ export default function Transfer(){
     //handleApprove
     const handleApprove = async(e) => {
         const metamaskAddressRegex = /^(0x)?[0-9a-fA-F]{40}$/;
+        setCompletedApprove(false)
         try{
             if(metamaskAddressRegex.test(owner)){
                 setDisableApprove(true)
@@ -49,21 +91,34 @@ export default function Transfer(){
                     const contract_information = await getContractInformation()  
                     const formattedAmount = mytoken_contract.Ethers.utils.parseUnits(amount_approve.toString(),contract_information.decimals)
             
-                    const isApproved = await contract_information.deployed_contract.contract.connect(contract_information.deployed_contract.signer).approve(owner,formattedAmount)
-                    window.localStorage.setItem('approved_address',owner)
-                    window.localStorage.setItem('is_approved',true)
-                    window.localStorage.setItem('approved_value',amount_approve.toString())
+                    const approved_account = await contract_information.deployed_contract.contract.connect(contract_information.deployed_contract.signer).approve(owner,formattedAmount)
+                    const isSaveApproved = await saveApprove(approved_account.hash,owner,await contract_information.deployed_contract.signer.getAddress(),Number(amount_approve.toString()),approved_account.confirmations)
+                    
 
-                    console.log('Is approved value is ', isApproved)
+                    // console.log('Is approved is ', isApproved)
+                    // console.log('Approved account is ', approved_account)
+                    
+                    
+                    // console.log('Isapproved hash ', approved_account.hash)
+                    // console.log('Onaylanann hesab ', owner)
+                    // console.log('Onaylayan hesab ', await contract_information.deployed_contract.signer.getAddress())
+                    // console.log('Amount is ', amount_approve.toString())
+                    // console.log('Confirmations ', approved_account.confirmations)
 
-                    await isApproved.wait()
+                    // window.localStorage.setItem('approved_address',owner)
+                    // window.localStorage.setItem('is_approved',true)
+                    // window.localStorage.setItem('approved_value',amount_approve.toString())
+
+                    // console.log('Is approved value  ', approved_account)
+
+                    await approved_account.wait()
 
                     toast_alert.success('Approved process completed successfully')
                 }, 5000);
             }
             else{
                 setDisableApprove(true)
-                window.localStorage.setItem('is_approved',false)
+                // window.localStorage.setItem('is_approved',false)
                 setTimeout(()=>{
                     toast_alert.error('Please input valid metamask addresss')
                     setDisableApprove(false)
@@ -71,7 +126,7 @@ export default function Transfer(){
             }
         }
         catch(err){
-            window.localStorage.setItem('is_approved',false)
+            // window.localStorage.setItem('is_approved',false)
             console.log('When you --- APPROVE ---- another metamask address encounteres come issues,please try again...')
         }
     }
@@ -80,10 +135,12 @@ export default function Transfer(){
     //handleAllowance
     const handleAllowance = async (e) => {
         const metamaskAddressRegex = /^(0x)?[0-9a-fA-F]{40}$/;
+        console.log('isCompletedApprove ', isCompletedApprove)
+
         try{
-            console.log('Approved addresss is ', window.localStorage.getItem('approved_address'))
-            console.log('Is approvedd is ', window.localStorage.getItem('is_approved'))
-            if(metamaskAddressRegex.test(spender) && spender == window.localStorage.getItem('approved_address') && window.localStorage.getItem('is_approved')){
+            // console.log('Approved addresss is ', window.localStorage.getItem('approved_address'))
+            // console.log('Is approvedd is ', window.localStorage.getItem('is_approved'))
+            if(metamaskAddressRegex.test(spender)){//&& spender == window.localStorage.getItem('approved_address') && window.localStorage.getItem('is_approved')
                 setDisableAllowance(true)
                 setTimeout(async (e) => {
                     setDisableAllowance(false)
@@ -94,20 +151,20 @@ export default function Transfer(){
                     toast_alert.success(`Allowed process completed successfully,spender balance is : ${mytoken_contract.Ethers.utils.formatUnits(allowanceAmount, contract_information.decimals)}`)
                 },5000);
             }
-            else if(!window.localStorage.getItem('is_approved')){
-                setDisableAllowance(true)
-                setTimeout(()=>{
-                    toast_alert.error('Please complete APPROVE process before for using ALLOWANCE process')
-                    setDisableAllowance(false)
-                },3000)
-            }
-            else if(spender != window.localStorage.getItem('approved_address')){
-                setDisableAllowance(true)
-                setTimeout(()=>{
-                    toast_alert.error('This address not approved please first approve this wallet address')
-                    setDisableAllowance(false)
-                },3000)
-            }
+            // else if(!window.localStorage.getItem('is_approved')){
+            //     setDisableAllowance(true)
+            //     setTimeout(()=>{
+            //         toast_alert.error('Please complete APPROVE process before for using ALLOWANCE process')
+            //         setDisableAllowance(false)
+            //     },3000)
+            // }
+            // else if(spender != window.localStorage.getItem('approved_address')){
+            //     setDisableAllowance(true)
+            //     setTimeout(()=>{
+            //         toast_alert.error('This address not approved please first approve this wallet address')
+            //         setDisableAllowance(false)
+            //     },3000)
+            // }
             else{
                 setDisableAllowance(true)
                 setTimeout(()=>{
@@ -126,13 +183,25 @@ export default function Transfer(){
     const handleTransferFrom = async (e) => {
         const metamaskAddressRegex = /^(0x)?[0-9a-fA-F]{40}$/;
         try{
-            console.log('Approved addresss is ', window.localStorage.getItem('approved_address'))
-            console.log('Is approvedd is ', window.localStorage.getItem('is_approved'))
+            // console.log('Approved addresss is ', window.localStorage.getItem('approved_address'))
+            // console.log('Is approvedd is ', window.localStorage.getItem('is_approved'))
 
-            console.log('Approved value is ', window.localStorage.getItem('approved_value'))
+            // console.log('Approved value is ', window.localStorage.getItem('approved_value'))
+            const confirmedApproveAccountBalance =  await handleUserBalance(confirmedApproveAccount)
+            console.log('Amount transfer value ', Number(amount_transfer))
 
 
-            if(metamaskAddressRegex.test(recipient) && amount_transfer > 0 && window.localStorage.getItem('approved_address') && window.localStorage.getItem('is_approved') && recipient != window.localStorage.getItem('approved_address') && amount_transfer <= Number(window.localStorage.getItem('approved_value')) ){
+            if(Number(amount_transfer) > Number(confirmedApproveAccountBalance)){
+                raiseAlertTransfer('Approved account not enough token for transfer process,please increse approved token value')
+                return 
+            }
+
+
+            console.log('Confirmed account balance is ', confirmedApproveAccountBalance)
+            console.log('isCompletedApprove ', isCompletedApprove)
+            console.log('Confirmed account is ', confirmedApproveAccount)
+
+            if(metamaskAddressRegex.test(recipient) && confirmedApproveAccount != null){// && amount_transfer > 0 && window.localStorage.getItem('approved_address') && window.localStorage.getItem('is_approved') && recipient != window.localStorage.getItem('approved_address') && amount_transfer <= Number(window.localStorage.getItem('approved_value'))
                 setDisableTransfer(true)
                 setTimeout(async (e) => {
                     setDisableTransfer(false)
@@ -144,7 +213,7 @@ export default function Transfer(){
 
                     // const tx = await deployed_contract.contract.connect(deployed_contract.signer).transfer(formData.address,formattedAmount)
 
-                    const seconSignerAddress = await mytoken_contract.ethers.getSigner(window.localStorage.getItem('approved_address'))
+                    const seconSignerAddress = await mytoken_contract.ethers.getSigner(confirmedApproveAccount)
 
                     console.log('Dostlar bunedir bele ', seconSignerAddress)
 
@@ -155,30 +224,29 @@ export default function Transfer(){
                     console.log('Sen allah bunedi bele ', tx)
                     await tx.wait()
                     toast_alert.success('Transfer From process completed successfully')
-
                 },5000)
             }
-            else if(!window.localStorage.getItem('is_approved')){
-                setDisableTransfer(true)
-                setTimeout(()=>{
-                    toast_alert.error('Please complete APPROVE process before for using TRANSFER process')
-                    setDisableTransfer(false)
-                },3000)
-            }
-            else if(recipient == window.localStorage.getItem('approved_address')){
-                setDisableTransfer(true)
-                setTimeout(()=>{
-                    toast_alert.error("You don't send token approved account")                    
-                    setDisableTransfer(false)
-                },3000)
-            }
-            else if(amount_transfer > Number(window.localStorage.getItem('approved_value'))){
-                setDisableTransfer(true)
-                setTimeout(() => {
-                    setDisableTransfer(false)
-                    toast_alert.error('Approved account not enough token for transfer process,please increse approved token value')
-                }, 3000);
-            }
+            // else if(!window.localStorage.getItem('is_approved')){
+            //     setDisableTransfer(true)
+            //     setTimeout(()=>{
+            //         toast_alert.error('Please complete APPROVE process before for using TRANSFER process')
+            //         setDisableTransfer(false)
+            //     },3000)
+            // }
+            // else if(recipient == window.localStorage.getItem('approved_address')){
+            //     setDisableTransfer(true)
+            //     setTimeout(()=>{
+            //         toast_alert.error("You don't send token approved account")                    
+            //         setDisableTransfer(false)
+            //     },3000)
+            // }
+            // else if(amount_transfer > Number(window.localStorage.getItem('approved_value'))){
+            //     setDisableTransfer(true)
+            //     setTimeout(() => {
+            //         setDisableTransfer(false)
+            //         toast_alert.error('Approved account not enough token for transfer process,please increse approved token value')
+            //     }, 3000);
+            // }
             else{
                 setDisableTransfer(true)
                 setTimeout(() => {

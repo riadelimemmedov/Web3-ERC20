@@ -25,6 +25,7 @@ export default function App(){
     const [tokenSymbol,setTokenSymbol] = useState('')
     const [totalSupply,setTotalSupply] = useState('')
     
+    
 
     //getContract
     const getContract = async () => {

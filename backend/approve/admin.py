@@ -5,7 +5,7 @@ from .models import *
 
 #!ApproveModelAdmin
 class ApproveModelAdmin(admin.ModelAdmin):
-    list_display = ['confirming_account','confirmed_account','approvment_hash','amount','is_approve','confirmations','created','modified']
+    list_display = ['confirming_account','confirmed_account','approvment_hash','amount','is_approve','confirmations','created','modified','approvment_slug']
     list_display_links = ['confirming_account','confirmed_account','approvment_hash']
     
     

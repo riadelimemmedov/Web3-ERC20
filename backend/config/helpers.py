@@ -14,13 +14,15 @@ from django.utils.text import slugify
 
 
 #?metamask_address_validator
-def validate_metamask_address(value):
-    if not re.match(r'^0x[0-9a-fA-F]{40}$', value):
+def validate_metamask_address(address):
+    if not re.match(r'^0x[0-9a-fA-F]{40}$', address):
         raise ValidationError('Metamask address wallet format is not valid. Please check your account from Metamask, then try again.')
+    return True
 
 
 #?validate_amount
 def validate_amount(value):
     if value <= 0:
         raise ValidationError('You have approve minimum 1 token')
+    return True
     

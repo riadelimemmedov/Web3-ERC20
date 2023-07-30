@@ -25,7 +25,7 @@ class Approve(TimeStampedModel):
     approvment_hash  = models.CharField(verbose_name='Approvment hash',max_length = 100,blank=False)#FrontEnd
     confirmed_account = models.CharField(verbose_name='Confirmed account',max_length=100,blank=False,validators=[validate_metamask_address])#Onaylanan hesab,FrontEnd
     confirming_account = models.CharField(verbose_name='Confirming account',max_length=100,blank=False,validators=[validate_metamask_address])#Onaylayan hesab,FrontEnd
-    amount = models.FloatField(verbose_name='Amount of approve',blank=True,validators=[validate_amount])#FrontEnd
+    amount = models.FloatField(verbose_name='Amount of approve',blank=True,null=True,validators=[validate_amount])#FrontEnd
     is_approve = models.BooleanField(verbose_name='Is approve', default=False)
     confirmations = models.IntegerField(verbose_name='Confirmed approvement value', default=0)#FrontEnd
     
