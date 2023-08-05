@@ -19,5 +19,6 @@ from django.urls import path,include
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('approve/',include('approve.urls',namespace='approve'))
+    path('approve/',include('approve.urls',namespace='approve')),
+    path('transfer/',include('transfer.urls',namespace='transfer'))
 ]

@@ -51,6 +51,9 @@ export default function Header(){
             <div className="d-flex justify-content-between">
                 <ConnectButton/>
                 <p>
+                    <span className='m-2'>
+                        <a href="/transfer" className="badge bg-danger" style={{textDecoration:"none"}}>Transfer one account to another</a>
+                    </span>
                     {
                         isWeb3Enabled && account ? (
                             <span className="badge bg-primary">{userBalance} <span class="text-warning">MYT</span></span>
@@ -59,7 +62,7 @@ export default function Header(){
                             <span></span>
                         )
                     }
-                </p>               
+                </p>              
             </div>
             {
             //     account ? (

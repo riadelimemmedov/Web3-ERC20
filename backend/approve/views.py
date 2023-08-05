@@ -14,8 +14,9 @@ from .serializers import ApproveSerializer
 
 
 
-#?ApproveView
+#?ApproveListCreateView
 class ApproveListCreateView(APIView):
+    """Get and Create Approve"""
     
     #get
     def get(self,request,*args, **kwargs):
@@ -30,7 +31,26 @@ class ApproveListCreateView(APIView):
     #post
     def post(self,request,*args,**kwargs):  
         request.data['is_approve'] = True if request.data['confirmations'] == 1 else False
-        serializer = ApproveSerializer(data=request.data)
+        
+        try:
+            print('Try isledi qaqaa')
+            approve = Approve.objects.get(confirmed_account=request.data['confirmed_account'])
+        except Approve.DoesNotExist:
+            print('Except isledii qaqaa')
+            approve = None
+            
+        if approve:
+            print('Apprived exists broo update event called`')
+            serializer=ApproveSerializer(approve,data=request.data)
+        else:
+            print('Appove NOT exists created new approve object')
+            serializer=ApproveSerializer(data=request.data)
+            
+        
+        # print('Bunedi ala tapildi ', approve)
+        # print('Confirmed account is ', request.data['confirmed_account'])
+        
+        # serializer = ApproveSerializer(data=request.data)
         if serializer.is_valid():
                 serializer.save()
                 return Response(serializer.data,status=status.HTTP_201_CREATED)
@@ -39,14 +59,14 @@ class ApproveListCreateView(APIView):
 
 #?ApproveGetView
 class ApproveGetView(APIView):
+    """Return a approved user""" 
     
     #get
     def get(self,request,slug,*args,**kwargs):
-        """Return a approved user""" 
         print('Slug is ', slug)
         try:
             data = get_object_or_404(Approve,approvment_slug=slug)            
             serializer = ApproveSerializer(data)
             return Response(serializer.data,status=status.HTTP_200_OK)
         except Approve.DoesNotExist:
-                return Response({'error':'Approved method not found'},status=status.HTTP_404_NOT_FOUND)
+                return Response({'error':'Approved object not found'},status=status.HTTP_404_NOT_FOUND)

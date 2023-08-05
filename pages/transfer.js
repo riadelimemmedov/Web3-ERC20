@@ -71,6 +71,38 @@ export default function Transfer(){
     }
 
 
+
+    const saveTransfer = async(transfer_hash,transfer_from,transfer_to,transfer_amount,confirmations) => {
+        await axios.post('http://127.0.0.1:8000/transfer/create/',{            
+            "transfer_hash":transfer_hash,
+            "transfer_from": transfer_from,
+            "transfer_to": transfer_to,
+            "transfer_amount": transfer_amount,
+            "confirmations": confirmations,
+            "transfer_approvement":String(transfer_from)
+            
+        })
+        .then((response) => {
+            if(response.data){
+                console.log('Bunediii alaa complete or not ', response.data)
+            }
+        })
+        .catch((err) => {
+            console.log('Encounter error when save transfer to database ', err)
+        })
+
+        
+        console.log('Transfer  hash ', transfer_hash)
+        console.log('Transfer from  ', transfer_from)
+        console.log('Transfer to ', transfer_to)
+        console.log('Trnsfer amount ', transfer_amount)
+        console.log('Transfer confirmations value is ', confirmations)
+        return true
+    }
+
+
+
+
     //getContractInformation
     const getContractInformation = async()=>{
         const deployed_contract = await mytoken_contract.deployContract()
@@ -187,8 +219,14 @@ export default function Transfer(){
             // console.log('Is approvedd is ', window.localStorage.getItem('is_approved'))
 
             // console.log('Approved value is ', window.localStorage.getItem('approved_value'))
-            const confirmedApproveAccountBalance =  await handleUserBalance(confirmedApproveAccount)
-            console.log('Amount transfer value ', Number(amount_transfer))
+            // const confirmedApproveAccountBalance =  await handleUserBalance(confirmedApproveAccount)
+
+            const contract_information = await getContractInformation()  
+            const allowanceAmount = await contract_information.deployed_contract.contract.allowance(contract_information.deployed_contract.signer.getAddress(), confirmedApproveAccount); 
+            const confirmedApproveAccountBalance = mytoken_contract.Ethers.utils.formatUnits(allowanceAmount, contract_information.decimals)
+
+
+
 
 
             if(Number(amount_transfer) > Number(confirmedApproveAccountBalance)){
@@ -201,7 +239,7 @@ export default function Transfer(){
             console.log('isCompletedApprove ', isCompletedApprove)
             console.log('Confirmed account is ', confirmedApproveAccount)
 
-            if(metamaskAddressRegex.test(recipient) && confirmedApproveAccount != null){// && amount_transfer > 0 && window.localStorage.getItem('approved_address') && window.localStorage.getItem('is_approved') && recipient != window.localStorage.getItem('approved_address') && amount_transfer <= Number(window.localStorage.getItem('approved_value'))
+            if(metamaskAddressRegex.test(recipient) && confirmedApproveAccount != null && isCompletedApprove == true){// && amount_transfer > 0 && window.localStorage.getItem('approved_address') && window.localStorage.getItem('is_approved') && recipient != window.localStorage.getItem('approved_address') && amount_transfer <= Number(window.localStorage.getItem('approved_value'))
                 setDisableTransfer(true)
                 setTimeout(async (e) => {
                     setDisableTransfer(false)
@@ -219,6 +257,11 @@ export default function Transfer(){
 
                     const tx = await contract_information.deployed_contract.contract.connect(seconSignerAddress).transferFrom(contract_information.deployed_contract.signer.getAddress(),recipient,formattedAmount)
                     const user_balance =  await handleUserBalance(recipient)
+
+                    const isSaveTransfer = await saveTransfer(tx.hash,confirmedApproveAccount,recipient,Number(amount_transfer.toString()),tx.confirmations)
+
+
+
                     console.log('User balance is ', user_balance)
 
                     console.log('Sen allah bunedi bele ', tx)
@@ -251,12 +294,12 @@ export default function Transfer(){
                 setDisableTransfer(true)
                 setTimeout(() => {
                     setDisableTransfer(false)
-                    toast_alert.error('Amount transfer value must be higher than 0,and also please check wallet address value if you write false')
+                    toast_alert.error('Please first complete APPROVE account process and MetamaskAddress format')
                 }, 3000);
             }
         }
         catch(err){
-            console.log('When you --- TRANSFER FROM  --- another metamask address encounteres come issues,please try again...')            
+            toast_alert.error('Please first complete APPROVE account process')
         }
     }
 
