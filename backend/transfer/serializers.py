@@ -35,7 +35,7 @@ class TransferSerializer(serializers.ModelSerializer):
     
 
     
-    #validate_amount
+    #validate_transfer_amount
     def validate_transfer_amount(self,data):
         if validate_amount(data):
             return data
