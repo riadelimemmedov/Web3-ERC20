@@ -22,7 +22,6 @@ class TransferListCreateView(APIView):
     
     #get
     def get(self,request,*args, **kwargs):
-        
         try:
             transfers = Transfer.objects.all()
             serializer = TransferSerializer(transfers,many=True)
@@ -41,7 +40,6 @@ class TransferListCreateView(APIView):
         request.data['transfer_approvement'] = approve_obj.pk
         request.data['is_transfer'] = True if request.data['confirmations'] == 1 else False
 
-    
         serializer = TransferSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
