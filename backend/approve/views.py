@@ -13,7 +13,6 @@ from .serializers import ApproveSerializer
 # Create your views here.
 
 
-
 #?ApproveListCreateView
 class ApproveListCreateView(APIView):
     """Get and Create Approve"""
@@ -33,24 +32,16 @@ class ApproveListCreateView(APIView):
         request.data['is_approve'] = True if request.data['confirmations'] == 1 else False
         
         try:
-            print('Try isledi qaqaa')
             approve = Approve.objects.get(confirmed_account=request.data['confirmed_account'])
         except Approve.DoesNotExist:
-            print('Except isledii qaqaa')
             approve = None
             
+            
         if approve:
-            print('Apprived exists broo update event called`')
             serializer=ApproveSerializer(approve,data=request.data)
         else:
-            print('Appove NOT exists created new approve object')
             serializer=ApproveSerializer(data=request.data)
-            
         
-        # print('Bunedi ala tapildi ', approve)
-        # print('Confirmed account is ', request.data['confirmed_account'])
-        
-        # serializer = ApproveSerializer(data=request.data)
         if serializer.is_valid():
                 serializer.save()
                 return Response(serializer.data,status=status.HTTP_201_CREATED)
@@ -63,7 +54,6 @@ class ApproveGetView(APIView):
     
     #get
     def get(self,request,slug,*args,**kwargs):
-        print('Slug is ', slug)
         try:
             data = get_object_or_404(Approve,approvment_slug=slug)            
             serializer = ApproveSerializer(data)
