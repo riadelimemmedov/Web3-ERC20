@@ -15,6 +15,8 @@ import CheckUserBalance from '../components/balance_check.js'
 
 //!Deployed Contracts
 const mytoken_contract = require('../contracts/my_token.js')
+const mytoken_contract_prod = require('../contracts/my_token_prod.js')
+
 
 
 //?App
@@ -24,11 +26,14 @@ export default function App(){
     const [tokenName,setTokenName] = useState('')
     const [tokenSymbol,setTokenSymbol] = useState('')
     const [totalSupply,setTotalSupply] = useState('')
+
+    const [serverName,setServerName] = useState()
     
     
 
     //getContract
-    const getContract = async () => {
+    const getContract = async (server_name) => {
+        setServerName(server_name)
         const deployed_contract = await mytoken_contract.deployContract()
         setTokenName(await deployed_contract.contract.name())
         setTokenSymbol(await deployed_contract.contract.symbol())
@@ -39,9 +44,11 @@ export default function App(){
     //checkProdorLocal
     const checkProdorLocal = async () => {
         if(typeof window !== 'undefined' && typeof window.ethereum !== 'undefined'){
-            toast.success('You are currently PROD must be install metamask for connect to DApp Blockchain application - Rinkeby')
+            getContract('production')
+            toast.success('You are currently PROD must be install metamask for connect to DApp Blockchain application - Sepolia')
         }
         else{
+            getContract('local')
             toast.info('You are currently working on HardHat test server  - METAMASK not needed,We give you Fake Account')
         }
     }
@@ -49,16 +56,16 @@ export default function App(){
 
     //useEffect
     useEffect(() => {
-        getContract();
         checkProdorLocal();
     }, []);
 
 
     //returned jsx to client
     return(
+        <>
         <div className="container">  
             <div className="m-5">
-                <Header/>
+                <Header serverNameValueHeader={serverName}/>
             </div>
 
             <div className="text-center bg-light p-5 m-5 shadow">
@@ -70,8 +77,9 @@ export default function App(){
                 <p class="alert alert-info" role="alert">Token symbol : {tokenSymbol}</p>
                 <p class="alert alert-info" role="alert">Token total supply : {totalSupply}</p>
             </div>
-            <TransferToken/>
-            <CheckUserBalance/>
+            <TransferToken serverNameValueTransfer={serverName}/>
+            <CheckUserBalance serverNameValueUserBalance={serverName}/>
         </div>
+        </>
     )
 }

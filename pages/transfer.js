@@ -8,6 +8,11 @@ import {toast, toast as toast_alert} from "react-hot-toast";
 import axios from 'axios'
 
 
+
+//!Custom Components
+import Header from "../components/header"
+
+
 //!Deployed Contracts
 const mytoken_contract = require('../contracts/my_token.js')
 
@@ -18,10 +23,10 @@ const mytoken_contract = require('../contracts/my_token.js')
 //?Transfer
 export default function Transfer(){
     //state
+    
     const [owner,setOwner] = useState()
     const [spender,setSpender] = useState()
     const [recipient,setRecipient] = useState()
-
     const [disable_approve,setDisableApprove] = useState(false)
     const [disable_allowance,setDisableAllowance] = useState(false)
     const [disable_transfer,setDisableTransfer] = useState(false)
@@ -227,71 +232,81 @@ export default function Transfer(){
 
     //returned jsx to client
     return(
-        <div className="bg-light text-left p-5 m-5 shadow">
-            <h1 className="mb-5 text-secondary">Transfer One Account To Another Coin</h1>
-            <hr/>
-
-            {/* !Allowance  */}
-            <form className="container mt-5 p-0" style={{marginLeft:'0.1px'}}>
-                Owner address : <b>{owner}</b> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                Amount for approver : <b>{amount_approve}</b>
-                <hr/>
-
-                <div className="row">
-                    <div className="col-4">
-                        <input type="text" className="form-control p-3" value={owner} onChange={(e)=>setOwner(e.target.value)}  placeholder="Approved address"/>
-                    </div>
-                    <div className="col-4">
-                        <input type="number" className="form-control p-3" value={amount_approve} onChange={(e)=>setAmountApprove(e.target.value)} placeholder="Amount value"/>
-                    </div>
-                    <div className="col-2">
-                        <button type="button" onClick={handleApprove} className="btn btn-warning fw-bold w-20" style={{padding:'14px'}} disabled={disable_approve || !owner || !amount_approve}>
-                            {disable_approve ? 'Approving...' : 'Approve'}
-                        </button>
-                    </div>
+        
+        <>
+            <div className="container">
+                <div className="m-5">
+                    <Header/>
                 </div>
-            </form>
+                <div className="bg-light text-left p-5 m-5 shadow">
+                    <h1 className="mb-5 text-secondary">Transfer One Account To Another Coin</h1>
+                    <hr/>
 
-            {/* !Allowance  */}
-            <form className="container mt-5 p-0" style={{marginLeft:'0.1px'}}>
-                Spender address : <b>{spender}</b>
-                <hr/>
+                    {/* !Allowance  */}
+                    <form className="container mt-5 p-0" style={{marginLeft:'0.1px'}}>
+                        Owner address : <b>{owner}</b> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                        Amount for approver : <b>{amount_approve}</b>
+                        <hr/>
 
-                <div className="row">
-                    <div className="col-8">
-                        <input type="text" className="form-control p-3" value={spender} onChange={(e)=>setSpender(e.target.value)}  placeholder="Spender address"/>
-                    </div>
-                    <div className="col-2">
-                        <button type="button" onClick={handleAllowance} className="btn btn-info fw-bold w-20" style={{padding:'14px'}} disabled={disable_allowance || !spender}>
-                            {disable_allowance ? 'Allowed...' : 'Allow'}
-                        </button>
-                    </div>
+                        <div className="row">
+                            <div className="col-4">
+                                <input type="text" className="form-control p-3" value={owner} onChange={(e)=>setOwner(e.target.value)}  placeholder="Approved address"/>
+                            </div>
+                            <div className="col-4">
+                                <input type="number" className="form-control p-3" value={amount_approve} onChange={(e)=>setAmountApprove(e.target.value)} placeholder="Amount value"/>
+                            </div>
+                            <div className="col-2">
+                                <button type="button" onClick={handleApprove} className="btn btn-warning fw-bold w-20" style={{padding:'14px'}} disabled={disable_approve || !owner || !amount_approve}>
+                                    {disable_approve ? 'Approving...' : 'Approve'}
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+
+                    {/* !Allowance  */}
+                    <form className="container mt-5 p-0" style={{marginLeft:'0.1px'}}>
+                        Spender address : <b>{spender}</b>
+                        <hr/>
+
+                        <div className="row">
+                            <div className="col-8">
+                                <input type="text" className="form-control p-3" value={spender} onChange={(e)=>setSpender(e.target.value)}  placeholder="Spender address"/>
+                            </div>
+                            <div className="col-2">
+                                <button type="button" onClick={handleAllowance} className="btn btn-info fw-bold w-20" style={{padding:'14px'}} disabled={disable_allowance || !spender}>
+                                    {disable_allowance ? 'Allowed...' : 'Allow'}
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+
+
+                    {/* !Transfer From  */}
+                    <form className="container mt-5 p-0" style={{marginLeft:'0.1px'}}>
+                        Recipient address : <b>{recipient}</b> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                        Transfer amount value : <b>{amount_transfer}</b>
+
+                        <hr/>
+
+                        <div className="row">
+                            <div className="col-4">
+                                <input type="text" className="form-control p-3" value={recipient} onChange={(e)=>setRecipient(e.target.value)}  placeholder="Recipient address"/>
+                            </div>
+                            <div className="col-4">
+                                <input type="text" className="form-control p-3" value={amount_transfer} onChange={(e)=>setAmountTransfer(e.target.value)}  placeholder="Amount value"/>
+                            </div>
+                            <div className="col-2">
+                                <button type="button" onClick={handleTransferFrom} className="btn btn-primary fw-bold w-20" style={{padding:'14px'}} disabled={disable_transfer || !recipient || !amount_transfer}>
+                                    {disable_transfer ? 'Transferring...' : 'Transfer'}
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+
                 </div>
-            </form>
-
-
-            {/* !Transfer From  */}
-            <form className="container mt-5 p-0" style={{marginLeft:'0.1px'}}>
-                Recipient address : <b>{recipient}</b> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                Transfer amount value : <b>{amount_transfer}</b>
-
-                <hr/>
-
-                <div className="row">
-                    <div className="col-4">
-                        <input type="text" className="form-control p-3" value={recipient} onChange={(e)=>setRecipient(e.target.value)}  placeholder="Recipient address"/>
-                    </div>
-                    <div className="col-4">
-                        <input type="text" className="form-control p-3" value={amount_transfer} onChange={(e)=>setAmountTransfer(e.target.value)}  placeholder="Amount value"/>
-                    </div>
-                    <div className="col-2">
-                        <button type="button" onClick={handleTransferFrom} className="btn btn-primary fw-bold w-20" style={{padding:'14px'}} disabled={disable_transfer || !recipient || !amount_transfer}>
-                            {disable_transfer ? 'Transferring...' : 'Transfer'}
-                        </button>
-                    </div>
-                </div>
-            </form>
-
-        </div>  
+            </div>
+        
+        </>
+          
     )
 }

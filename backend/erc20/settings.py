@@ -47,7 +47,8 @@ INSTALLED_APPS = [
     #My custom application
     'approve',
     'transfer',
-    'config'
+    'config',
+    'blockchain_server'
 ]
 
 MIDDLEWARE = [

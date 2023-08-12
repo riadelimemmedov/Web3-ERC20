@@ -4,13 +4,28 @@ import { ToastContainer, toast } from 'react-toastify';
 import { Toaster } from "react-hot-toast";
 
 
+//!Css classes
+import './../css/header.css'
+
+
 //!Next.js
 import Head from "next/head";
+
+
+//*Environment variables
+require('dotenv').config()
+const Moralis = require("moralis").default;
+
 
 
 //?MyApp
 function MyApp({Component,pageProps}){
     //jsx
+    
+    Moralis.start({
+        apiKey:`${process.env.NEXT_PUBLIC_MORALIS_API_KEY}`
+    })
+
     return(
         <>   
             <Head>

@@ -1,5 +1,7 @@
 //!React and Next.js
 import { useState,useEffect } from 'react'
+import { useRouter } from 'next/router';
+
 
 
 //!Third Party Packages
@@ -9,6 +11,7 @@ import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
 
+
 //!Deployed Contracts
 const ethers = require("../contracts/ethers.js");
 const mytoken_contract = require('../contracts/my_token.js')
@@ -16,7 +19,7 @@ const mytoken_contract = require('../contracts/my_token.js')
 
 
 //?Header
-export default function Header(){
+export default function Header(props){
 
     //state
     // const { enableWeb3, account,isWeb3Enabled } = useMoralis();
@@ -28,6 +31,14 @@ export default function Header(){
     const enableMoralisWeb3 = async () => {
         await enableWeb3()
     }
+
+
+    //router
+    const router = useRouter()
+
+
+
+
 
 
     //useEffect
@@ -47,16 +58,21 @@ export default function Header(){
 
     //jsx
     return(
-        <div>
+        <>
             <div className="d-flex justify-content-between">
                 <ConnectButton/>
                 <p>
-                    <span className='m-2'>
-                        <a href="/transfer" className="badge bg-danger" style={{textDecoration:"none"}}>Transfer one account to another</a>
+                    <span className='m-0'>
+                        <a href="/transfer" className={`badge bg-danger ${router.asPath=='/transfer' ? 'disable-link' : ''}`} style={{textDecoration:"none"}}>Transfer one account to another</a>
                     </span>
                     {
                         isWeb3Enabled && account ? (
-                            <span className="badge bg-primary">{userBalance} <span class="text-warning">MYT</span></span>
+                            <>  
+                                <span className='m-2'>
+                                    <a href="/transaction" className={`badge bg-secondary ${router.asPath=='/transaction' ? 'disable-link' : ''}`} style={{textDecoration:"none"}}>Transaction</a>
+                                </span>
+                                <span className="badge bg-primary">{userBalance} <span class="text-warning">MYT</span></span>
+                            </>
                         )
                         :(
                             <span></span>
@@ -76,6 +92,6 @@ export default function Header(){
             //         </button>
             //     )
             }
-        </div>
+        </>
     )
 }

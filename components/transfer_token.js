@@ -86,7 +86,6 @@ export default function TransferToken(){
     }
 
 
-
     //return jsx
     return(
         <div className="text-center bg-light p-5 m-5 shadow">
