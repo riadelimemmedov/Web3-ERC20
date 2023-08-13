@@ -6,6 +6,7 @@ import { useState,useEffect } from "react";
 //!Third Party Packages
 import { useMoralis } from "react-moralis";
 import {toast, toast as toast_alert} from "react-hot-toast";
+import axios from "axios";
 
 
 
@@ -25,6 +26,16 @@ export default function CheckUserBalance (props) {
     const [isDisable,setIsDisable] = useState(false)
 
 
+    const convertBalance = (balance) => {
+        const divisor = 1e18; // Dividing by 10^18 to convert to Ether
+        const decimalPlaces = 4;
+        const formattedNumber = (balance / divisor).toFixed(decimalPlaces)
+        return formattedNumber
+        
+    }
+
+
+
     //handleUserBalance
     const handleUserBalance = async () => {
         const metamaskAddressRegex = /^(0x)?[0-9a-fA-F]{40}$/;
@@ -33,10 +44,15 @@ export default function CheckUserBalance (props) {
                 setLoading(true)
                 setTimeout(async(e) => {
                     // const contract = (await mytoken_contract.deployContract()).contract
-                    const contract = props.serverNameValueUserBalance == 'production' ? await mytoken_contract_prod.deployContractProd() : await mytoken_contract.deployContract()
+                    const server_name = await axios.get('http://127.0.0.1:8000/server/get/server/name').then((response) => response.data.server_name)
 
-                    const balance = await contract.balanceOf(address);
-                    const formattedBalance = mytoken_contract.Ethers.utils.formatEther(balance)
+                    const contract = server_name == 'production' ? await mytoken_contract_prod.deployContractProd() : await mytoken_contract.deployContract()
+                    const balance = server_name == 'production' ? await contract.contract.balanceOf(address) : await contract.contract.balanceOf(address); 
+                    const formattedBalance = convertBalance(balance)
+                    
+
+                    // const balance = await contract.balanceOf(address);
+                    // const formattedBalance = mytoken_contract.Ethers.utils.formatEther(balance)
                     setBalance(formattedBalance)
                     setLoading(false)
                 }, 5000);

@@ -9,6 +9,7 @@ import { useMoralis } from 'react-moralis'
 import { ConnectButton } from 'web3uikit';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import axios from 'axios';
 
 
 
@@ -52,13 +53,18 @@ export default function Header(props){
     useEffect(() => {
         if(isWeb3Enabled && account){
             const getBalance = async () => {
-                const contract = props.serverNameValueHeader == 'production' ? await mytoken_contract_prod.deployContractProd() : await mytoken_contract.deployContract()
-                const balance = props.serverNameValueHeader == 'production' ? await contract.userBalance : await contract.userBalance; 
+                const server_name = await axios.get('http://127.0.0.1:8000/server/get/server/name').then((response) => response.data.server_name)
+                console.log('Abiler bunedir bele ', server_name)
+
+                const contract = server_name == 'production' ? await mytoken_contract_prod.deployContractProd() : await mytoken_contract.deployContract()
+                const balance = server_name == 'production' ? await contract.contract.balanceOf(account) : await contract.contract.balanceOf(account); 
                 const formattedBalance = convertBalance(balance)
 
                 console.log('Acoount ', account)
-                console.log('Balance is ', contract.userBalance.toString())
-                // const balance = await contract.balanceOf(account);
+                console.log('Formatted ERC20 Token balance is ', formattedBalance)
+                // console.log('Balance is ', contract.userBalance.toString())
+                const balance1 = await contract.contract.balanceOf(account);
+                console.log('ddddddddd ', balance1.toString());
                 // const formattedBalance = mytoken_contract.Ethers.utils.formatEther(balance)
 
                 // const divisor = 1e18; // Dividing by 10^18 to convert to Ether

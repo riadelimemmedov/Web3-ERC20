@@ -5,6 +5,8 @@ import { useState,useEffect } from "react";
 //!Third Party Packages
 import { useMoralis } from "react-moralis";
 import {toast, toast as toast_alert} from "react-hot-toast";
+import axios from 'axios';
+
 
 
 
@@ -31,7 +33,6 @@ export default function TransferToken(props){
     //Account
     const { account } = useMoralis()
 
-    console.log('Transfer token current server name is ', props.serverNameValueTransfer);
 
 
     //handleInputValue
@@ -68,7 +69,8 @@ export default function TransferToken(props){
             setLoading(true)
             setTimeout(async()=>{
                     //Deploy contract
-                    const deployed_contract = props.serverNameValueTransfer == 'production' ? await mytoken_contract_prod.deployContractProd() : await mytoken_contract.deployContract()
+                    const server_name = await axios.get('http://127.0.0.1:8000/server/get/server/name').then((response) => response.data.server_name)
+                    const deployed_contract = server_name == 'production' ? await mytoken_contract_prod.deployContractProd() : await mytoken_contract.deployContract()
                     
                     const decimals = await deployed_contract.contract.decimals() 
                     const formattedAmount = mytoken_contract.Ethers.utils.parseUnits(formData.amount.toString(),decimals)
@@ -79,8 +81,8 @@ export default function TransferToken(props){
                     toast_alert.success('Token transferred successfully')
                     setLoading(false)
                     formData.address = ''
-                    formData.amount = null
-                    window.location.reload()
+                    formData.amount = ''
+                    // window.location.reload()
             },3000)
         }
         catch(err){

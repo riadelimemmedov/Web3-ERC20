@@ -41,7 +41,7 @@ export default function App(){
         // const deployed_contract = await mytoken_contract.deployContract()
 
         const deployed_contract = server_name == 'production' ? await mytoken_contract_prod.deployContractProd() : await mytoken_contract.deployContract()
-        console.log('Server name index file ', deployed_contract)
+        console.log('Server name index file ', server_name)
         
 
         setTokenName(await deployed_contract.contract.name())
@@ -53,28 +53,30 @@ export default function App(){
     }
 
 
-    const getChainId = async() => {
-        const networkName = await window.ethereum.request({ method: 'net_version' });
-        setChainId(networkName)
-        return networkName
+    const refreshPage = () => {
+        setTimeout(() => {
+            router.reload()
+        }, 3000);
     }
 
 
     //checkProdorLocal
     const checkProdorLocal = async () => {
-        let chainId = await getChainId()
 
         if(typeof window !== 'undefined' && typeof window.ethereum !== 'undefined' ){
             window.ethereum.on('chainChanged', (chainId) => {
+                console.log('Chain id is ', chainId)
                 if(chainId != 0x7a69){
                     getContract('production')
                     axios.put('http://127.0.0.1:8000/server/get/server/name',{server_name: "production"})
                     toast.success('You are currently PROD must be install metamask for connect to DApp Blockchain application - Sepolia')        
+                    refreshPage()
                 }
                 else{
                     getContract('local')
                     axios.put('http://127.0.0.1:8000/server/get/server/name',{server_name: "local"})
                     toast.info('You are currently working on HardHat test server  - METAMASK not needed,We give you Fake Account')
+                    refreshPage()
                 }
             });
         }
@@ -82,12 +84,6 @@ export default function App(){
             toast.error('Something went wrong,please try again')
         }
     }
-
-
-
-
-
-
 
 
     //useEffect
@@ -105,7 +101,6 @@ export default function App(){
             </div>
 
             <div className="text-center bg-light p-5 m-5 shadow">
-                Chain Id Is : {chainId}
                 <h1>Welcome My ERC20 Token Application</h1>
             </div>
 

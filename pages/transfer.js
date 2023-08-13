@@ -15,6 +15,8 @@ import Header from "../components/header"
 
 //!Deployed Contracts
 const mytoken_contract = require('../contracts/my_token.js')
+const mytoken_contract_prod = require('../contracts/my_token_prod.js')
+
 
 
 
@@ -50,7 +52,7 @@ export default function Transfer(){
         }, 3000);
     }
 
-
+    
     //saveApprove
     const saveApprove = async (approvment_hash,confirmed_account,confirming_account,amount,confirmations) => {
         await axios.post('http://127.0.0.1:8000/approve/create/',{
@@ -102,9 +104,10 @@ export default function Transfer(){
 
     //getContractInformation
     const getContractInformation = async()=>{
-        const deployed_contract = await mytoken_contract.deployContract()
+        const server_name = await axios.get('http://127.0.0.1:8000/server/get/server/name').then((response) => response.data.server_name)
+        const deployed_contract = server_name == 'production' ? await mytoken_contract_prod.deployContractProd() : await mytoken_contract.deployContract()
         const decimals = await deployed_contract.contract.decimals()
-        return{deployed_contract,decimals}
+        return{deployed_contract,decimals,server_name}
     }
 
     //handleApprove
@@ -117,7 +120,7 @@ export default function Transfer(){
                 setTimeout(async(e) => {
                     setDisableApprove(false)
                     const contract_information = await getContractInformation()  
-                    const formattedAmount = mytoken_contract.Ethers.utils.parseUnits(amount_approve.toString(),contract_information.decimals)
+                    const formattedAmount = contract_information.server_name == 'production' ? mytoken_contract_prod.Ethers.utils.parseUnits(amount_approve.toString(),contract_information.decimals) : mytoken_contract.Ethers.utils.parseUnits(amount_approve.toString(),contract_information.decimals)
             
                     const approved_account = await contract_information.deployed_contract.contract.connect(contract_information.deployed_contract.signer).approve(owner,formattedAmount)
                     const isSaveApproved = await saveApprove(approved_account.hash,owner,await contract_information.deployed_contract.signer.getAddress(),Number(amount_approve.toString()),approved_account.confirmations)
