@@ -13,8 +13,9 @@ import 'react-toastify/dist/ReactToastify.css';
 
 
 //!Deployed Contracts
-const ethers = require("../contracts/ethers.js");
 const mytoken_contract = require('../contracts/my_token.js')
+const mytoken_contract_prod = require('../contracts/my_token_prod.js')
+
 
 
 
@@ -37,7 +38,13 @@ export default function Header(props){
     const router = useRouter()
 
 
-
+    const convertBalance = (balance) => {
+        const divisor = 1e18; // Dividing by 10^18 to convert to Ether
+        const decimalPlaces = 4;
+        const formattedNumber = (balance / divisor).toFixed(decimalPlaces)
+        return formattedNumber
+        
+    }
 
 
 
@@ -45,9 +52,20 @@ export default function Header(props){
     useEffect(() => {
         if(isWeb3Enabled && account){
             const getBalance = async () => {
-                const contract = (await mytoken_contract.deployContract()).contract
-                const balance = await contract.balanceOf(account);
-                const formattedBalance = mytoken_contract.Ethers.utils.formatEther(balance)
+                const contract = props.serverNameValueHeader == 'production' ? await mytoken_contract_prod.deployContractProd() : await mytoken_contract.deployContract()
+                const balance = props.serverNameValueHeader == 'production' ? await contract.userBalance : await contract.userBalance; 
+                const formattedBalance = convertBalance(balance)
+
+                console.log('Acoount ', account)
+                console.log('Balance is ', contract.userBalance.toString())
+                // const balance = await contract.balanceOf(account);
+                // const formattedBalance = mytoken_contract.Ethers.utils.formatEther(balance)
+
+                // const divisor = 1e18; // Dividing by 10^18 to convert to Ether
+                // const decimalPlaces = 4;
+                // const formattedNumber = (balance / divisor).toFixed(decimalPlaces)
+
+                // console.log('Formatted Balance is ', formattedNumber)
                 setUserBalance(formattedBalance)
             }
             getBalance()

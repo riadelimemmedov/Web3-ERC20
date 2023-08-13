@@ -10,9 +10,12 @@ import {toast, toast as toast_alert} from "react-hot-toast";
 
 //!Deployed Contracts
 const mytoken_contract = require('../contracts/my_token.js')
+const mytoken_contract_prod = require('../contracts/my_token_prod.js')
+
+
 
 //?TransferToken
-export default function TransferToken(){
+export default function TransferToken(props){
     
     //state
     const [address,setAddress] = useState('')
@@ -28,6 +31,7 @@ export default function TransferToken(){
     //Account
     const { account } = useMoralis()
 
+    console.log('Transfer token current server name is ', props.serverNameValueTransfer);
 
 
     //handleInputValue
@@ -64,7 +68,8 @@ export default function TransferToken(){
             setLoading(true)
             setTimeout(async()=>{
                     //Deploy contract
-                    const deployed_contract = await mytoken_contract.deployContract()
+                    const deployed_contract = props.serverNameValueTransfer == 'production' ? await mytoken_contract_prod.deployContractProd() : await mytoken_contract.deployContract()
+                    
                     const decimals = await deployed_contract.contract.decimals() 
                     const formattedAmount = mytoken_contract.Ethers.utils.parseUnits(formData.amount.toString(),decimals)
 

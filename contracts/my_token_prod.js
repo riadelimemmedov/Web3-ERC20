@@ -30,4 +30,4 @@ const deployContractProd = async () => {
 
     return {contract,deployeNetwork,userBalance,signer}
 }
-module.exports = {Ethers,ethers,MyTokenProd,MyTokenProd,deployContractProd}
+module.exports = {Ethers,ethers,MyTokenProd,deployContractProd}

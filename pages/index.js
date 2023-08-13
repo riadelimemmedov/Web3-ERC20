@@ -11,12 +11,15 @@ import 'react-toastify/dist/ReactToastify.css';
 import Header from "../components/header"
 import TransferToken from '../components/transfer_token.js'
 import CheckUserBalance from '../components/balance_check.js'
+import axios from 'axios';
 
 
 //!Deployed Contracts
 const mytoken_contract = require('../contracts/my_token.js')
 const mytoken_contract_prod = require('../contracts/my_token_prod.js')
 
+
+import { useRouter } from 'next/router';
 
 
 //?App
@@ -28,30 +31,63 @@ export default function App(){
     const [totalSupply,setTotalSupply] = useState('')
 
     const [serverName,setServerName] = useState()
+    const [chainId,setChainId] = useState()
     
-    
+    const router = useRouter();
 
     //getContract
     const getContract = async (server_name) => {
         setServerName(server_name)
-        const deployed_contract = await mytoken_contract.deployContract()
+        // const deployed_contract = await mytoken_contract.deployContract()
+
+        const deployed_contract = server_name == 'production' ? await mytoken_contract_prod.deployContractProd() : await mytoken_contract.deployContract()
+        console.log('Server name index file ', deployed_contract)
+        
+
         setTokenName(await deployed_contract.contract.name())
+        console.log("🚀 ~ file: index.js:45 ~ getContract ~ deployed_contract.contract.name():",await  deployed_contract.contract.name())
         setTokenSymbol(await deployed_contract.contract.symbol())
+        console.log("🚀 ~ file: index.js:47 ~ getContract ~ deployed_contract.contract.symbol():", await deployed_contract.contract.symbol())
         setTotalSupply(mytoken_contract.Ethers.utils.formatUnits(await deployed_contract.contract.totalSupply(),18))
+        console.log("🚀 ~ file: index.js:49 ~ getContract ~ mytoken_contract.Ethers.utils.formatUnits(await deployed_contract.contract.totalSupply(),18):", mytoken_contract.Ethers.utils.formatUnits(await deployed_contract.contract.totalSupply(),18))
+    }
+
+
+    const getChainId = async() => {
+        const networkName = await window.ethereum.request({ method: 'net_version' });
+        setChainId(networkName)
+        return networkName
     }
 
 
     //checkProdorLocal
     const checkProdorLocal = async () => {
-        if(typeof window !== 'undefined' && typeof window.ethereum !== 'undefined'){
-            getContract('production')
-            toast.success('You are currently PROD must be install metamask for connect to DApp Blockchain application - Sepolia')
+        let chainId = await getChainId()
+
+        if(typeof window !== 'undefined' && typeof window.ethereum !== 'undefined' ){
+            window.ethereum.on('chainChanged', (chainId) => {
+                if(chainId != 0x7a69){
+                    getContract('production')
+                    axios.put('http://127.0.0.1:8000/server/get/server/name',{server_name: "production"})
+                    toast.success('You are currently PROD must be install metamask for connect to DApp Blockchain application - Sepolia')        
+                }
+                else{
+                    getContract('local')
+                    axios.put('http://127.0.0.1:8000/server/get/server/name',{server_name: "local"})
+                    toast.info('You are currently working on HardHat test server  - METAMASK not needed,We give you Fake Account')
+                }
+            });
         }
         else{
-            getContract('local')
-            toast.info('You are currently working on HardHat test server  - METAMASK not needed,We give you Fake Account')
+            toast.error('Something went wrong,please try again')
         }
     }
+
+
+
+
+
+
 
 
     //useEffect
@@ -69,6 +105,7 @@ export default function App(){
             </div>
 
             <div className="text-center bg-light p-5 m-5 shadow">
+                Chain Id Is : {chainId}
                 <h1>Welcome My ERC20 Token Application</h1>
             </div>
 
@@ -77,8 +114,8 @@ export default function App(){
                 <p class="alert alert-info" role="alert">Token symbol : {tokenSymbol}</p>
                 <p class="alert alert-info" role="alert">Token total supply : {totalSupply}</p>
             </div>
-            <TransferToken serverNameValueTransfer={serverName}/>
-            <CheckUserBalance serverNameValueUserBalance={serverName}/>
+                <TransferToken serverNameValueTransfer={serverName}/>
+                <CheckUserBalance serverNameValueUserBalance={serverName}/>
         </div>
         </>
     )

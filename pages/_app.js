@@ -10,6 +10,7 @@ import './../css/header.css'
 
 //!Next.js
 import Head from "next/head";
+import { useState } from "react";
 
 
 //*Environment variables
@@ -21,6 +22,7 @@ const Moralis = require("moralis").default;
 //?MyApp
 function MyApp({Component,pageProps}){
     //jsx
+
     
     Moralis.start({
         apiKey:`${process.env.NEXT_PUBLIC_MORALIS_API_KEY}`

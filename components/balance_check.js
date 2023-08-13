@@ -11,10 +11,12 @@ import {toast, toast as toast_alert} from "react-hot-toast";
 
 //!Deployed Contracts
 const mytoken_contract = require('../contracts/my_token.js')
+const mytoken_contract_prod = require('../contracts/my_token_prod.js')
+
 
 
 //?CheckUserBalance
-export default function CheckUserBalance () {
+export default function CheckUserBalance (props) {
 
     //state
     const [address, setAddress] = useState("");
@@ -30,7 +32,9 @@ export default function CheckUserBalance () {
             if(metamaskAddressRegex.test(address)){
                 setLoading(true)
                 setTimeout(async(e) => {
-                    const contract = (await mytoken_contract.deployContract()).contract
+                    // const contract = (await mytoken_contract.deployContract()).contract
+                    const contract = props.serverNameValueUserBalance == 'production' ? await mytoken_contract_prod.deployContractProd() : await mytoken_contract.deployContract()
+
                     const balance = await contract.balanceOf(address);
                     const formattedBalance = mytoken_contract.Ethers.utils.formatEther(balance)
                     setBalance(formattedBalance)
@@ -52,6 +56,9 @@ export default function CheckUserBalance () {
             setLoading(false)
         }
     }
+
+    console.log('Check user lanace token current server name is ', props.serverNameValueUserBalance);
+
 
 
     //return jsx
