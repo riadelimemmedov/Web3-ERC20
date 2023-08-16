@@ -23,9 +23,13 @@ module.exports = {
     //       privateKey:process.env.HARDHAT_ACCOUNT_PRIVATE_KEY,
     //       balance:"1000000000000000000000",
     //     },
+    //     {
+    //       privateKey:process.env.HARDHAT_ACCOUNT_PRIVATE_KEY,
+    //       balance:"1000000000000000000000",
+    //     },
     //   ],
     //   chainId:31337
-    // }
+    // },
     sepolia:{
       url:process.env.SEPOLIA_NODE_URL_HTTPS,
       accounts:[process.env.METAMASK_PRIVATE_KEY],

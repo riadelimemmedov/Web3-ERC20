@@ -1,5 +1,7 @@
 //!React and Next.js
 import { useState,useEffect } from 'react'
+import { useRouter } from 'next/router';
+
 
 
 //!Thirty Part Packages
@@ -19,7 +21,6 @@ const mytoken_contract = require('../contracts/my_token.js')
 const mytoken_contract_prod = require('../contracts/my_token_prod.js')
 
 
-import { useRouter } from 'next/router';
 
 
 //?App
@@ -84,7 +85,6 @@ export default function App(){
             toast.error('Something went wrong,please try again')
         }
     }
-
 
     //useEffect
     useEffect(() => {

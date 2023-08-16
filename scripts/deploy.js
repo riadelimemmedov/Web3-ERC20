@@ -28,11 +28,13 @@ async function main() {
    //Logging the address of the deployed contract
   console.log('Counter address ', await contract.address)
   
-  const deployedContract = await setDeployContract(contract.interface.format('json'),contract.address,hre.network.name)
 
   //Get sender user addresss,well you know who deploy that is contract
   const receipt = await contract.deployTransaction.wait()// Line of code is waiting for the deployment transaction to be included in six blocks on the Ethereum blockchain. This is done to ensure that the transaction has sufficient confirmations, which helps to ensure the transaction will not be reversed.
   console.log('Deployed by address ', receipt.from)
+
+  const deployedContract = await setDeployContract(contract.interface.format('json'),contract.address,hre.network.name,receipt.from)
+
 
 
   //?Verify source code in etherscan
@@ -75,8 +77,8 @@ validateMain()
 
 
 //!setDeployContract
-async function setDeployContract(abi,address,network) {
-  const contractData = {abi,address,'network':hre.network.name}
+async function setDeployContract(abi,address,network,receipt) {
+  const contractData = {abi,address,'network':hre.network.name,'deployer':receipt}
   if(network == 'localhost'){
     const filePath = "./data/MyTokenLocal.json"
     fs.writeFileSync(filePath,JSON.stringify(contractData))
