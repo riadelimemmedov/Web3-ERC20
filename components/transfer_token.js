@@ -19,6 +19,7 @@ const mytoken_contract_prod = require('../contracts/my_token_prod.js')
 //?TransferToken
 export default function TransferToken(props){
     
+
     //state
     const [address,setAddress] = useState('')
     const [amount,setAmount] = useState()
@@ -34,6 +35,27 @@ export default function TransferToken(props){
     const { account } = useMoralis()
 
 
+
+        //saveTransfer
+    const saveTransfer = async(transfer_hash,transfer_from,transfer_to,transfer_amount,confirmations) => {
+        await axios.post('http://127.0.0.1:8000/transfer/create/',{            
+            "transfer_hash":transfer_hash,
+            "transfer_from": transfer_from,
+            "transfer_to": transfer_to,
+            "transfer_amount": transfer_amount,
+            "confirmations": confirmations,
+            "transfer_approvement":String(transfer_from)
+        })
+        .then((response) => {
+            if(response.data){
+                console.log('Completed transfer succsesfully ', response.data)
+            }
+        })
+        .catch((err) => {
+            console.log('Encounter error when save transfer to database ', err)
+        })
+        return true
+    }
 
     //handleInputValue
     const handleInputValue = (key) => (event) => {
@@ -65,6 +87,7 @@ export default function TransferToken(props){
 
     //handleTransfer
     const handleTransfer = async (e) => {
+        let isFinished = false
         try{
             setLoading(true)
             setTimeout(async()=>{
@@ -77,8 +100,25 @@ export default function TransferToken(props){
 
                     // Send the transaction using the signer
                     const tx = await deployed_contract.contract.connect(deployed_contract.signer).transfer(formData.address,formattedAmount)
+                    
+                    console.log('Transaction is ', tx)
+
+                    console.log('Tranasction hash is ', tx.hash)
+                    console.log('Trnsaction from ', await deployed_contract.signer.getAddress())
+                    console.log('Transaction to ', formData.address)
+                    console.log('Transaction value is ', formattedAmount)
+                    console.log('Transaction confirmations ', tx.confirmations)
+
+
+                    console.log('Is Finished value before transaction ', isFinished)
+
+
                     await tx.wait()
                     toast_alert.success('Token transferred successfully')
+                    isFinished=true
+                    const isSaveTransfer = await saveTransfer(tx.hash,await deployed_contract.signer.getAddress(),formData.address,Number(formattedAmount.toString()),isFinished == true ? 1 : 0)
+
+                    console.log('Is Finished value after transaction ', isFinished)
                     setLoading(false)
                     formData.address = ''
                     formData.amount = ''

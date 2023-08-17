@@ -65,13 +65,11 @@ export default function Transfer(){
             if(chainId != 0x7a69){
                 console.log('Work if cyrrently you are production  blocjahin server')
                 axios.put('http://127.0.0.1:8000/server/get/server/name',{server_name: "production"})
-                // toast_alert.success('You are currently PROD must be install metamask for connect to DApp Blockchain application - Sepolia')        
                 refreshPage()
             }
             else{
                 console.log('You are currently localhost hrafhat server')
                 axios.put('http://127.0.0.1:8000/server/get/server/name',{server_name: "local"})
-                // toast_alert('You are currently working on HardHat test server  - METAMASK not needed,We give you Fake Account')
                 refreshPage()
             }
         })
@@ -149,10 +147,10 @@ export default function Transfer(){
 
     //getContractInformation
     const getContractInformation = async()=>{
-        const server_name = await axios.get('http://127.0.0.1:8000/server/get/server/name').then((response) => response.data.server_name)
-        const deployed_contract = server_name == 'production' ? await mytoken_contract_prod.deployContractProd() : await mytoken_contract.deployContract()
+        // const server_name = await axios.get('http://127.0.0.1:8000/server/get/server/name').then((response) => response.data.server_name)
+        const deployed_contract = await mytoken_contract.deployContract()
         const decimals = await deployed_contract.contract.decimals()
-        return{deployed_contract,decimals,server_name}
+        return{deployed_contract,decimals}
     }
 
     //handleApprove
@@ -163,27 +161,15 @@ export default function Transfer(){
             setDisableApprove(true)
             setTimeout(async(e) => {
                 const contract_information = await getContractInformation()  
-                const formattedAmount = contract_information.server_name == 'production' ? mytoken_contract_prod.Ethers.utils.parseUnits(amount_approve.toString(),contract_information.decimals) : mytoken_contract.Ethers.utils.parseUnits(amount_approve.toString(),contract_information.decimals)
-                
-
-                console.log('Formatted amoutn is ', formattedAmount)
-                console.log('Owner is ', owner)
-                console.log('Deployed contract owner is ', contract_information.deployed_contract.signer)
-                
+                const formattedAmount = mytoken_contract.Ethers.utils.parseUnits(amount_approve.toString(),contract_information.decimals)
 
                 try{
-                    const approved_account = await contract_information.deployed_contract.contract.connect(contract_information.deployed_contract.signer).approve(owner,formattedAmount)
-
-                    console.log('Approbved account wtf ', approved_account)
-    
+                    const approved_account = await contract_information.deployed_contract.contract.connect(contract_information.deployed_contract.signer).approve(owner,formattedAmount)    
                     await approved_account.wait()
                     
-    
-                    toast_alert.success('Approved process completed successfully')
-                    console.log('Approbved account after ', approved_account)
-                    const isSaveApproved = await saveApprove(approved_account.hash,owner,await contract_information.deployed_contract.signer.getAddress(),Number(amount_approve.toString()),1)
-                    
-                    console.log('IsApproved is ', isSaveApproved)
+                    const isSaveApproved = await saveApprove(approved_account.hash,owner,await contract_information.deployed_contract.signer.getAddress(),Number(amount_approve.toString()),approved_account.confirmations)
+
+                    toast_alert.success('Approved process completed successfully')                    
                     setDisableApprove(false)
                 }
                 catch(err){
@@ -208,11 +194,10 @@ export default function Transfer(){
             if(metamaskAddressRegex.test(spender)){
                 setDisableAllowance(true)
                 setTimeout(async (e) => {
-                    setDisableAllowance(false)
+                    setDisableAllowance(false)                
                     const contract_information = await getContractInformation()  
-                    const allowanceAmount = await contract_information.deployed_contract.contract.allowance(contract_information.deployed_contract.deployer, spender); 
-                    const formattedAmount = contract_information.server_name == 'production' ? mytoken_contract_prod.Ethers.utils.formatUnits(allowanceAmount,contract_information.decimals) : mytoken_contract.Ethers.utils.formatUnits(allowanceAmount,contract_information.decimals)
-
+                    const allowanceAmount = await contract_information.deployed_contract.contract.allowance(contract_information.deployed_contract.signer.getAddress(), spender); 
+                    const formattedAmount = mytoken_contract.Ethers.utils.formatUnits(allowanceAmount,contract_information.decimals)
                     toast_alert.success(`Allowed process completed successfully,spender balance is : ${formattedAmount}`)
                 },5000);
             }
@@ -235,15 +220,8 @@ export default function Transfer(){
         const metamaskAddressRegex = /^(0x)?[0-9a-fA-F]{40}$/;
         try{
             const contract_information = await getContractInformation()  
-
-            console.log('Contract information ', contract_information)
-
-            const allowanceAmount = await contract_information.deployed_contract.contract.allowance(contract_information.deployed_contract.deployer, confirmedApproveAccount); 
-            
-            // const confirmedApproveAccountBalance = mytoken_contract.Ethers.utils.formatUnits(allowanceAmount, contract_information.decimals)
-            const confirmedApproveAccountBalance = contract_information.server_name == 'production' ? mytoken_contract_prod.Ethers.utils.formatUnits(allowanceAmount,contract_information.decimals) : mytoken_contract.Ethers.utils.formatUnits(allowanceAmount,contract_information.decimals)
-
-            
+            const allowanceAmount = await contract_information.deployed_contract.contract.allowance(contract_information.deployed_contract.signer.getAddress(), confirmedApproveAccount); 
+            const confirmedApproveAccountBalance = mytoken_contract.Ethers.utils.formatUnits(allowanceAmount, contract_information.decimals)
 
 
             if(recipient == confirmedApproveAccount){
@@ -262,26 +240,14 @@ export default function Transfer(){
                     setDisableTransfer(false)
                     const contract_information = await getContractInformation()  
 
-                    // const formattedAmount = mytoken_contract.Ethers.utils.parseUnits(amount_transfer.toString(),contract_information.decimals)
-                    // const formattedAmount = contract_information.server_name == 'production' ? mytoken_contract_prod.Ethers.utils.parseUnits(amount_transfer.toString(),contract_information.decimals) : mytoken_contract.Ethers.utils.parseUnits(amount_transfer.toString(),contract_information.decimals)
-
+                    const formattedAmount = mytoken_contract.Ethers.utils.parseUnits(amount_transfer.toString(),contract_information.decimals)
                     
-                    // const seconSignerAddress = await mytoken_contract.ethers.getSigner(confirmedApproveAccount)
-                    const seconSignerAddress = contract_information.server_name == 'production' ?  mytoken_contract_prod.ethers.getSigner(confirmedApproveAccount) : mytoken_contract.ethers.getSigner(confirmedApproveAccount)
+                    const seconSignerAddress = await mytoken_contract.ethers.getSigner(confirmedApproveAccount)
 
-                    console.log('Second address wtfffdsadsadsa ', seconSignerAddress)
+                    const tx = await contract_information.deployed_contract.contract.connect(seconSignerAddress).transferFrom(contract_information.deployed_contract.signer.getAddress(),recipient,formattedAmount)
+                    const user_balance =  await handleUserBalance(recipient)
 
-                    console.log('Ay blet bunedii ala ', await contract_information.deployed_contract.signer.getAddress())
-
-
-                    const formattedAmount = mytoken_contract_prod.Ethers.utils.parseUnits(amount_transfer, 18);
-                    console.log('Formatted amount is ', formattedAmount)
-                    const tx = await contract_information.deployed_contract.contract.connect(seconSignerAddress).transferFrom(contract_information.deployed_contract.deployer,recipient,formattedAmount)
-                    
-                    // const approved_account = await contract_information.deployed_contract.contract.connect(contract_information.deployed_contract.signer).approve(owner,formattedAmount)
-                    console.log('Tx workk not ', tx)
-
-
+                    const isSaveTransfer = await saveTransfer(tx.hash,confirmedApproveAccount,recipient,Number(amount_transfer.toString()),tx.confirmations)
 
                     await tx.wait()
                     toast_alert.success('Transfer From process completed successfully')
@@ -301,20 +267,16 @@ export default function Transfer(){
     }
 
 
-    //handleUserBalance
+
+     //handleUserBalance
     const handleUserBalance = async (address) => {
-        const contract_information = await getContractInformation()  
-        const contract = contract_information.server_name == 'production' ? ((await mytoken_contract_prod.deployContractProd()).contract) : (await mytoken_contract.deployContract()).contract 
-
-
-        // const contract = (await mytoken_contract.deployContract()).contract
-        
+        const contract = (await mytoken_contract.deployContract()).contract
         const balance = await contract.balanceOf(address)
         const formattedBalance = mytoken_contract.Ethers.utils.formatEther(balance)
         return formattedBalance
     }
 
-
+    
     useState(()=>{
         getServerName()
     },[])
@@ -333,69 +295,82 @@ export default function Transfer(){
                     <hr/>
                     <h1 className="mb-5 text-secondary">Server Name : <span className="text-danger text-capitalize">{serverName}</span></h1>
 
-                    {/* !Approve  */}
-                    <form className="container mt-5 p-0" style={{marginLeft:'0.1px'}}>
-                        Owner address : <b>{owner}</b> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                        Amount for approver : <b>{amount_approve}</b>
-                        <hr/>
-
-                        <div className="row">
-                            <div className='col-4'>
-                                <input type="text" className="form-control p-3" id="approved_account_address" value={owner} onChange={(e)=>setOwner(e.target.value)}  placeholder="Approved address"/>
+                    {
+                        serverName == 'local' ? (
+                            <div>
+                            {/* !Approve  */}
+                            <form className="container mt-5 p-0" style={{marginLeft:'0.1px'}}>
+                                Owner address : <b>{owner}</b> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                                Amount for approver : <b>{amount_approve}</b>
+                                <hr/>
+    
+                                <div className="row">
+                                    <div className='col-4'>
+                                        <input type="text" className="form-control p-3" id="approved_account_address" value={owner} onChange={(e)=>setOwner(e.target.value)}  placeholder="Approved address"/>
+                                    </div>
+    
+                                    <div className="col-4">
+                                        <input type="number" className="form-control p-3" id="approved_account_amount" value={amount_approve} onChange={(e)=>setAmountApprove(e.target.value)} placeholder="Amount value"/>
+                                    </div>
+    
+                                    
+                                    <div className="col-2">
+                                        <button type="button" onClick={handleApprove} className="btn btn-warning fw-bold w-20" style={{padding:'14px'}} disabled={disable_approve || !owner || !amount_approve }>
+                                            {disable_approve ? 'Approving...' : 'Approve'}
+                                        </button>
+                                    </div>
+                                </div>
+                            </form>
+    
+                            {/* !Allowance  */}
+                            <form className="container mt-5 p-0" style={{marginLeft:'0.1px'}}>
+                                Spender address : <b>{spender}</b>
+                                <hr/>
+    
+                                <div className="row">
+                                    <div className="col-8">
+                                        <input type="text" className="form-control p-3" value={spender} onChange={(e)=>setSpender(e.target.value)}  placeholder="Spender address"/>
+                                    </div>
+                                    <div className="col-2">
+                                        <button type="button" onClick={handleAllowance} className="btn btn-info fw-bold w-20" style={{padding:'14px'}} disabled={disable_allowance || !spender}>
+                                            {disable_allowance ? 'Allowed...' : 'Allow'}
+                                        </button>
+                                    </div>
+                                </div>
+                            </form>
+    
+                            {/* !Transfer From  */}
+                            <form className="container mt-5 p-0" style={{marginLeft:'0.1px'}}>
+                                Recipient address : <b>{recipient}</b> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                                Transfer amount value : <b>{amount_transfer}</b>
+    
+                                <hr/>
+    
+                                <div className="row">
+                                    <div className="col-4">
+                                        <input type="text" className="form-control p-3" value={recipient} onChange={(e)=>setRecipient(e.target.value)}  placeholder="Recipient address"/>
+                                    </div>
+                                    <div className="col-4">
+                                        <input type="text" className="form-control p-3" value={amount_transfer} onChange={(e)=>setAmountTransfer(e.target.value)}  placeholder="Amount value"/>
+                                    </div>
+                                    <div className="col-2">
+                                        <button type="button" onClick={handleTransferFrom} className="btn btn-primary fw-bold w-20" style={{padding:'14px'}} disabled={disable_transfer || !recipient || !amount_transfer}>
+                                            {disable_transfer ? 'Transferring...' : 'Transfer'}
+                                        </button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                        )
+                        :(
+                            <div className="alert alert-danger p-4">
+                                If you want use this process,you must be accses custom created network
                             </div>
-
-                            <div className="col-4">
-                                <input type="number" className="form-control p-3" id="approved_account_amount" value={amount_approve} onChange={(e)=>setAmountApprove(e.target.value)} placeholder="Amount value"/>
-                            </div>
-
                             
-                            <div className="col-2">
-                                <button type="button" onClick={handleApprove} className="btn btn-warning fw-bold w-20" style={{padding:'14px'}} disabled={disable_approve || !owner || !amount_approve }>
-                                    {disable_approve ? 'Approving...' : 'Approve'}
-                                </button>
-                            </div>
-                        </div>
-                    </form>
+                        )
+                    }
+        
 
-                    {/* !Allowance  */}
-                    <form className="container mt-5 p-0" style={{marginLeft:'0.1px'}}>
-                        Spender address : <b>{spender}</b>
-                        <hr/>
-
-                        <div className="row">
-                            <div className="col-8">
-                                <input type="text" className="form-control p-3" value={spender} onChange={(e)=>setSpender(e.target.value)}  placeholder="Spender address"/>
-                            </div>
-                            <div className="col-2">
-                                <button type="button" onClick={handleAllowance} className="btn btn-info fw-bold w-20" style={{padding:'14px'}} disabled={disable_allowance || !spender}>
-                                    {disable_allowance ? 'Allowed...' : 'Allow'}
-                                </button>
-                            </div>
-                        </div>
-                    </form>
-
-
-                    {/* !Transfer From  */}
-                    <form className="container mt-5 p-0" style={{marginLeft:'0.1px'}}>
-                        Recipient address : <b>{recipient}</b> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                        Transfer amount value : <b>{amount_transfer}</b>
-
-                        <hr/>
-
-                        <div className="row">
-                            <div className="col-4">
-                                <input type="text" className="form-control p-3" value={recipient} onChange={(e)=>setRecipient(e.target.value)}  placeholder="Recipient address"/>
-                            </div>
-                            <div className="col-4">
-                                <input type="text" className="form-control p-3" value={amount_transfer} onChange={(e)=>setAmountTransfer(e.target.value)}  placeholder="Amount value"/>
-                            </div>
-                            <div className="col-2">
-                                <button type="button" onClick={handleTransferFrom} className="btn btn-primary fw-bold w-20" style={{padding:'14px'}} disabled={disable_transfer || !recipient || !amount_transfer}>
-                                    {disable_transfer ? 'Transferring...' : 'Transfer'}
-                                </button>
-                            </div>
-                        </div>
-                    </form>
 
                 </div>
             </div>
