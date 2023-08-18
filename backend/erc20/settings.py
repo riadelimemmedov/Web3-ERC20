@@ -48,7 +48,8 @@ INSTALLED_APPS = [
     'approve',
     'transfer',
     'config',
-    'blockchain_server'
+    'blockchain_server',
+    'transaction'
 ]
 
 MIDDLEWARE = [

@@ -20,6 +20,7 @@ const deployContractProd = async () => {
     let signer = null
     let deployer = MyTokenProd.deployer
 
+
     console.log('Worked else and our contract deploy on PRODUCTION')
     console.log('Window ethereum is ', window.ethereum)
     const provider = new Ethers.providers.Web3Provider(window.ethereum)
@@ -30,6 +31,7 @@ const deployContractProd = async () => {
     let ub = (await signer.getBalance()).toString()
     userBalance = ub.toString()
     deployeNetwork=MyTokenProd.network
+
 
     return {contract,deployeNetwork,userBalance,signer,deployer,provider}
 }

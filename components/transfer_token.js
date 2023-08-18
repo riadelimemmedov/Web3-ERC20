@@ -36,19 +36,21 @@ export default function TransferToken(props){
 
 
 
-        //saveTransfer
-    const saveTransfer = async(transfer_hash,transfer_from,transfer_to,transfer_amount,confirmations) => {
-        await axios.post('http://127.0.0.1:8000/transfer/create/',{            
-            "transfer_hash":transfer_hash,
-            "transfer_from": transfer_from,
-            "transfer_to": transfer_to,
-            "transfer_amount": transfer_amount,
+    //saveTransaction
+    const saveTransaction = async(transaction_hash,transaction_from,transaction_to,transaction_amount,token_name,token_symbol,network,confirmations) => {
+        await axios.post('http://127.0.0.1:8000/transaction/create/',{            
+            "transaction_hash":transaction_hash,
+            "transaction_from": transaction_from,
+            "transaction_to": transaction_to,
+            "transaction_amount": transaction_amount,
+            "token_name":token_name,
+            "token_symbol":token_symbol,
+            "network":network,
             "confirmations": confirmations,
-            "transfer_approvement":String(transfer_from)
         })
         .then((response) => {
             if(response.data){
-                console.log('Completed transfer succsesfully ', response.data)
+                console.log('Completed transaction succsesfully ', response.data)
             }
         })
         .catch((err) => {
@@ -59,36 +61,26 @@ export default function TransferToken(props){
 
     //handleInputValue
     const handleInputValue = (key) => (event) => {
-
         const metamaskAddressRegex = /^(0x)?[0-9a-fA-F]{40}$/;
-        console.log('Work handleinput vlaue')
         if(!metamaskAddressRegex.test(event.target.value) && event.target.id == 'address'){
-            console.log('Form data address is ', event.target.value)
             toast.error('Please input valid metamask addresss')
             setIsDisable(true)
         }
         else{
             setIsDisable(false)
         }
-        
-
-        // if(formData.address.length > 0 && Number(formData.amount) > 0 && event.target.value != ''){
-        //     setIsDisable(false)
-        // }
-        // else if(formData.address == '' || Number(formData.amount) < 0 || event.target.value == ''){
-        //     setIsDisable(true)
-        // }
         setFormData((prevState) => ({
             ...prevState,
             [key]:event.target.value
-        }))
+        })) 
     }
     
 
     //handleTransfer
     const handleTransfer = async (e) => {
+        const metamaskAddressRegex = /^(0x)?[0-9a-fA-F]{40}$/;
         let isFinished = false
-        try{
+        if(metamaskAddressRegex.test(formData.address)){
             setLoading(true)
             setTimeout(async()=>{
                     //Deploy contract
@@ -98,36 +90,30 @@ export default function TransferToken(props){
                     const decimals = await deployed_contract.contract.decimals() 
                     const formattedAmount = mytoken_contract.Ethers.utils.parseUnits(formData.amount.toString(),decimals)
 
-                    // Send the transaction using the signer
-                    const tx = await deployed_contract.contract.connect(deployed_contract.signer).transfer(formData.address,formattedAmount)
-                    
-                    console.log('Transaction is ', tx)
-
-                    console.log('Tranasction hash is ', tx.hash)
-                    console.log('Trnsaction from ', await deployed_contract.signer.getAddress())
-                    console.log('Transaction to ', formData.address)
-                    console.log('Transaction value is ', formattedAmount)
-                    console.log('Transaction confirmations ', tx.confirmations)
-
-
-                    console.log('Is Finished value before transaction ', isFinished)
-
-
-                    await tx.wait()
-                    toast_alert.success('Token transferred successfully')
-                    isFinished=true
-                    const isSaveTransfer = await saveTransfer(tx.hash,await deployed_contract.signer.getAddress(),formData.address,Number(formattedAmount.toString()),isFinished == true ? 1 : 0)
-
-                    console.log('Is Finished value after transaction ', isFinished)
-                    setLoading(false)
-                    formData.address = ''
-                    formData.amount = ''
-                    // window.location.reload()
+                    try{
+                        // Send the transaction using the signer
+                        const tx = await deployed_contract.contract.connect(deployed_contract.signer).transfer(formData.address,formattedAmount)
+                        await tx.wait()
+                        toast_alert.success('Token transferred successfully')
+                        isFinished=true
+                        const isSaveTransaction = await saveTransaction(tx.hash,await deployed_contract.signer.getAddress(),formData.address,Number(formData.amount),await deployed_contract.contract.name(),await deployed_contract.contract.symbol(),deployed_contract.deployeNetwork,isFinished == true ? 1 : 0)
+                        setLoading(false)
+                        formData.address = ''
+                        formData.amount = ''
+                    }
+                    catch(err){
+                        if(err.code == "ACTION_REJECTED"){
+                            toast_alert.error('User rejected transaction')
+                        }
+                        else if(err.code == "UNPREDICTABLE_GAS_LIMIT" ){
+                            toast_alert.error('Transfer amount exceeds balance')
+                        }
+                        setLoading(false)
+                    }
             },3000)
         }
-        catch(err){
-            console.log('Error when transfer coin to another coin wallet')
-            toast_alert.error('Error transferring token')
+        else{
+            toast_alert.error('Please input valid metamask address format')
             setLoading(false)
         }
     }

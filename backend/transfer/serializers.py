@@ -6,8 +6,9 @@ from rest_framework import serializers
 
 
 #!Models and Serializers
-from .models import Transfer,Transaction
+from .models import Transfer
 from approve.models import Approve
+from blockchain_server.models import BlockChainServer
 from approve.serializers import ApproveSerializer
 
 
@@ -19,11 +20,13 @@ from config.helpers import (validate_metamask_address,validate_amount)
 #?TransferSerializer
 class TransferSerializer(serializers.ModelSerializer):
     # transfer_approvement = serializers.PrimaryKeyRelatedField(queryset=Approve.objects.all(),source="transfer_approvement.pk")
+    # blockchain_server = serializers.CharField(source="blockchain_server.server_name",read_only=True)
+    # blockchain_server = serializers.StringRelatedField()
     
     
     class Meta:
         model = Transfer
-        fields = ['transfer_hash','transfer_from','transfer_to','transfer_amount','is_transfer','confirmations','transfer_id','transfer_approvement']
+        fields = ['transfer_hash','transfer_from','transfer_to','transfer_amount','is_transfer','confirmations','transfer_id','transfer_approvement','blockchain_server','token_name','token_symbol','network']
         
     
     #validating transfer_from and transfer_to
@@ -45,37 +48,9 @@ class TransferSerializer(serializers.ModelSerializer):
     def to_representation(self, instance):
         transfer = super().to_representation(instance)
         transfer.pop('transfer_hash')
-        return transfer
-    
-    
-    
-
-#?TransactionSerializer
-class TransactionSerializer(serializers.ModelSerializer):
-    
-    
-    class Meta:
-        model = Transaction
-        fields = ['transaction_hash','transaction_from','transaction_to','transaction_amount','is_succsess','confirmations','transaction_id','transaction_approvement']
         
-    
-    #validating transaction_from and transaction_to
-    def validate(self,data):
-        transaction_from = data['transaction_from']
-        transaction_to = data['transaction_to']        
-        if validate_metamask_address(transaction_from) and validate_metamask_address(transaction_to):
-            return data
-    
-
-
-    #validate_transaction_amount
-    def validate_transaction_amount(self,data):
-        if validate_amount(data):
-            return data
-    
-    
-    #to_representation
-    def to_representation(self, instance):
-        transaction = super().to_representation(instance)
-        transaction.pop('transaction_hash')
-        return transaction
+        # blockchain_server = BlockChainServer.objects.first().server_name
+        # for key in transfer:
+        #     if key == 'blockchain_server':
+        #         transfer.update({key:blockchain_server})
+        return transfer

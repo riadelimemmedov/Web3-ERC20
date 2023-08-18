@@ -21,5 +21,6 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('approve/',include('approve.urls',namespace='approve')),
     path('transfer/',include('transfer.urls',namespace='transfer')),
-    path('server/',include('blockchain_server.urls',namespace='blockchain_server'))
+    path('server/',include('blockchain_server.urls',namespace='blockchain_server')),
+    path('transaction/',include('transaction.urls',namespace='transaction'))
 ]

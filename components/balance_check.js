@@ -35,7 +35,6 @@ export default function CheckUserBalance (props) {
     }
 
 
-
     //handleUserBalance
     const handleUserBalance = async () => {
         const metamaskAddressRegex = /^(0x)?[0-9a-fA-F]{40}$/;
@@ -50,9 +49,6 @@ export default function CheckUserBalance (props) {
                     const balance = server_name == 'production' ? await contract.contract.balanceOf(address) : await contract.contract.balanceOf(address); 
                     const formattedBalance = convertBalance(balance)
                     
-
-                    // const balance = await contract.balanceOf(address);
-                    // const formattedBalance = mytoken_contract.Ethers.utils.formatEther(balance)
                     setBalance(formattedBalance)
                     setLoading(false)
                 }, 5000);
@@ -72,10 +68,6 @@ export default function CheckUserBalance (props) {
             setLoading(false)
         }
     }
-
-    console.log('Check user lanace token current server name is ', props.serverNameValueUserBalance);
-
-
 
     //return jsx
     return(

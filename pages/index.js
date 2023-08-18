@@ -36,6 +36,8 @@ export default function App(){
     
     const router = useRouter();
 
+
+
     //getContract
     const getContract = async (server_name) => {
         setServerName(server_name)
@@ -43,17 +45,20 @@ export default function App(){
 
         const deployed_contract = server_name == 'production' ? await mytoken_contract_prod.deployContractProd() : await mytoken_contract.deployContract()
         console.log('Server name index file ', server_name)
-        
-
-        setTokenName(await deployed_contract.contract.name())
-        console.log("🚀 ~ file: index.js:45 ~ getContract ~ deployed_contract.contract.name():",await  deployed_contract.contract.name())
-        setTokenSymbol(await deployed_contract.contract.symbol())
-        console.log("🚀 ~ file: index.js:47 ~ getContract ~ deployed_contract.contract.symbol():", await deployed_contract.contract.symbol())
-        setTotalSupply(mytoken_contract.Ethers.utils.formatUnits(await deployed_contract.contract.totalSupply(),18))
-        console.log("🚀 ~ file: index.js:49 ~ getContract ~ mytoken_contract.Ethers.utils.formatUnits(await deployed_contract.contract.totalSupply(),18):", mytoken_contract.Ethers.utils.formatUnits(await deployed_contract.contract.totalSupply(),18))
     }
 
 
+    //getContractInformation
+    const getContractInformation = async () => {
+        const deployed_contract = await mytoken_contract.deployContract()
+        setTokenName(await deployed_contract.contract.name())
+        setTokenSymbol(await deployed_contract.contract.symbol())
+        setTotalSupply(mytoken_contract.Ethers.utils.formatUnits(await deployed_contract.contract.totalSupply(),18))
+    }
+
+
+
+    //refreshPage
     const refreshPage = () => {
         setTimeout(() => {
             router.reload()
@@ -63,7 +68,6 @@ export default function App(){
 
     //checkProdorLocal
     const checkProdorLocal = async () => {
-
         if(typeof window !== 'undefined' && typeof window.ethereum !== 'undefined' ){
             window.ethereum.on('chainChanged', (chainId) => {
                 console.log('Chain id is ', chainId)
@@ -86,9 +90,11 @@ export default function App(){
         }
     }
 
+     
     //useEffect
     useEffect(() => {
         checkProdorLocal();
+        getContractInformation()
     }, []);
 
 
@@ -105,9 +111,9 @@ export default function App(){
             </div>
 
             <div className="m-5">
-                <p class="alert alert-info" role="alert">Token name : {tokenName}</p>
-                <p class="alert alert-info" role="alert">Token symbol : {tokenSymbol}</p>
-                <p class="alert alert-info" role="alert">Token total supply : {totalSupply}</p>
+                <p className="alert alert-info" role="alert">Token name : {tokenName}</p>
+                <p className="alert alert-info" role="alert">Token symbol : {tokenSymbol}</p>
+                <p className="alert alert-info" role="alert">Token total supply : {totalSupply}</p>
             </div>
                 <TransferToken serverNameValueTransfer={serverName}/>
                 <CheckUserBalance serverNameValueUserBalance={serverName}/>

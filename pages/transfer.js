@@ -50,9 +50,7 @@ export default function Transfer(){
     const router = useRouter();
 
 
-
-
-
+    //refreshPage
     const refreshPage = () => {
         setTimeout(() => {
             router.reload()
@@ -60,6 +58,7 @@ export default function Transfer(){
     }
 
 
+    //checkNetwork
     if(typeof window !== 'undefined' && typeof window.ethereum !== 'undefined' ){
         window.ethereum.on('chainChanged', (chainId) => {
             if(chainId != 0x7a69){
@@ -76,6 +75,7 @@ export default function Transfer(){
     }
 
 
+    //getServerName
     const getServerName = async() => {
         setTimeout(async() => {
             const server_name = await axios.get('http://127.0.0.1:8000/server/get/server/name').then((response) => response.data.server_name)
@@ -83,6 +83,8 @@ export default function Transfer(){
         }, 100);
         return
     }
+
+
 
     //raiseAlertTransfer
     const raiseAlertTransfer = (message) => {
@@ -116,15 +118,20 @@ export default function Transfer(){
     }
 
 
-
-
     //saveTransfer
-    const saveTransfer = async(transfer_hash,transfer_from,transfer_to,transfer_amount,confirmations) => {
+    const saveTransfer = async(transfer_hash,transfer_from,transfer_to,transfer_amount,token_name,token_symbol,network,confirmations) => {
+        console.log('Token name ', token_name)
+        console.log('Token symbol ', token_symbol)
+        console.log('Token network ', network)
+
         await axios.post('http://127.0.0.1:8000/transfer/create/',{            
             "transfer_hash":transfer_hash,
             "transfer_from": transfer_from,
             "transfer_to": transfer_to,
             "transfer_amount": transfer_amount,
+            "token_name":token_name,
+            "token_symbol":token_symbol,
+            "network":network,
             "confirmations": confirmations,
             "transfer_approvement":String(transfer_from)
             
@@ -141,10 +148,6 @@ export default function Transfer(){
     }
 
 
-    
-
-
-
     //getContractInformation
     const getContractInformation = async()=>{
         // const server_name = await axios.get('http://127.0.0.1:8000/server/get/server/name').then((response) => response.data.server_name)
@@ -152,6 +155,7 @@ export default function Transfer(){
         const decimals = await deployed_contract.contract.decimals()
         return{deployed_contract,decimals}
     }
+
 
     //handleApprove
     const handleApprove = async(e) => {
@@ -238,19 +242,25 @@ export default function Transfer(){
                 setDisableTransfer(true)
                 setTimeout(async (e) => {
                     setDisableTransfer(false)
-                    const contract_information = await getContractInformation()  
+                    try{
+                        const contract_information = await getContractInformation()  
 
-                    const formattedAmount = mytoken_contract.Ethers.utils.parseUnits(amount_transfer.toString(),contract_information.decimals)
+                        const formattedAmount = mytoken_contract.Ethers.utils.parseUnits(amount_transfer.toString(),contract_information.decimals)
                     
-                    const seconSignerAddress = await mytoken_contract.ethers.getSigner(confirmedApproveAccount)
+                        const seconSignerAddress = await mytoken_contract.ethers.getSigner(confirmedApproveAccount)
 
-                    const tx = await contract_information.deployed_contract.contract.connect(seconSignerAddress).transferFrom(contract_information.deployed_contract.signer.getAddress(),recipient,formattedAmount)
-                    const user_balance =  await handleUserBalance(recipient)
+                        const tx = await contract_information.deployed_contract.contract.connect(seconSignerAddress).transferFrom(contract_information.deployed_contract.signer.getAddress(),recipient,formattedAmount)
+                        const user_balance =  await handleUserBalance(recipient)
 
-                    const isSaveTransfer = await saveTransfer(tx.hash,confirmedApproveAccount,recipient,Number(amount_transfer.toString()),tx.confirmations)
+                        const isSaveTransfer = await saveTransfer(tx.hash,confirmedApproveAccount,recipient,Number(amount_transfer.toString()),await contract_information.deployed_contract.contract.name(),await contract_information.deployed_contract.contract.symbol(),contract_information.deployed_contract.deployeNetwork,tx.confirmations)
 
-                    await tx.wait()
-                    toast_alert.success('Transfer From process completed successfully')
+                        await tx.wait()
+                        toast_alert.success('Transfer From process completed successfully')
+                    }
+                    catch(err){
+                        console.log('Error ',err)
+                        toast_alert.error('Occur some error transfer process')
+                    }
                 },5000)
             }
             else{
@@ -277,6 +287,8 @@ export default function Transfer(){
     }
 
     
+    
+    //useState
     useState(()=>{
         getServerName()
     },[])
@@ -369,9 +381,6 @@ export default function Transfer(){
                             
                         )
                     }
-        
-
-
                 </div>
             </div>
         

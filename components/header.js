@@ -60,18 +60,7 @@ export default function Header(props){
                 const balance = server_name == 'production' ? await contract.contract.balanceOf(account) : await contract.contract.balanceOf(account); 
                 const formattedBalance = convertBalance(balance)
 
-                console.log('Acoount ', account)
-                console.log('Formatted ERC20 Token balance is ', formattedBalance)
-                // console.log('Balance is ', contract.userBalance.toString())
                 const balance1 = await contract.contract.balanceOf(account);
-                console.log('ddddddddd ', balance1.toString());
-                // const formattedBalance = mytoken_contract.Ethers.utils.formatEther(balance)
-
-                // const divisor = 1e18; // Dividing by 10^18 to convert to Ether
-                // const decimalPlaces = 4;
-                // const formattedNumber = (balance / divisor).toFixed(decimalPlaces)
-
-                // console.log('Formatted Balance is ', formattedNumber)
                 setUserBalance(formattedBalance)
             }
             getBalance()
