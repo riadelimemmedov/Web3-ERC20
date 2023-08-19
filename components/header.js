@@ -57,10 +57,13 @@ export default function Header(props){
                 console.log('Abiler bunedir bele ', server_name)
 
                 const contract = server_name == 'production' ? await mytoken_contract_prod.deployContractProd() : await mytoken_contract.deployContract()
-                const balance = server_name == 'production' ? await contract.contract.balanceOf(account) : await contract.contract.balanceOf(account); 
+                const balance = await contract.contract.balanceOf(account); 
                 const formattedBalance = convertBalance(balance)
 
-                const balance1 = await contract.contract.balanceOf(account);
+                // console.log('Ala nolduu buna balance ', balance)
+
+                console.log('Aaccount balance is ', contract)
+                // const balance1 = await contract.contract.balanceOf(account);
                 setUserBalance(formattedBalance)
             }
             getBalance()
