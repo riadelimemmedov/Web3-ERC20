@@ -19,7 +19,7 @@ import { useMoralis } from 'react-moralis'
 import {toast, toast as toast_alert} from "react-hot-toast";
 import axios from 'axios';
 
-
+const { getAddress, toChecksumAddress } = require('ethers').utils;
 
 import ReactPaginate from 'react-paginate';
 
@@ -30,6 +30,8 @@ import FormControlLabel from '@mui/material/FormControlLabel';
 
 //?ContractTransition
 export default function ContractTransition(){
+
+    const [currentUserMetamaskAddress,setcurrentUserMetamaskAddress] = useState()
 
     const [contractAddress, setcontractAddress] = useState()
     const [contractNetwork, setContractNetwork] = useState()
@@ -60,6 +62,18 @@ export default function ContractTransition(){
     const pageCount = Math.ceil(itemsOwnerToUser.length / itemsPerPage);
 
 
+
+    //refreshPage
+    const refreshPage = () => {
+        setTimeout(() => {
+            router.reload()
+        }, 2000);
+    }   
+
+    
+
+
+
     const getUserTransactionAndTransferData = async (api_url) => {
         console.log('Qaqasss bunediii ', api_url);
         setUserTransactionAndTransfer([])
@@ -80,25 +94,32 @@ export default function ContractTransition(){
         console.log('Get transaction loading value ', loading)
         console.log('Server name  ', server_name)
         console.log('User change loading valuee ', transaction_type)
-        console.log('Current account address is ', account)
+
+        let currentUserAddress = mytoken_contract.Ethers.utils.getAddress(document.getElementById('user_address').textContent.trim())
+
+        
+        console.log('Current user address dsadsadsadsadsa ', currentUserAddress)
+        if(currentUserAddress){
+            console.log('First reload pageee returnedd current account address this ', currentUserAddress)
+        }
 
         
         if(!loading && server_name=='production'){
             // http://127.0.0.1:8000/transaction/get/0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266/
             // http://127.0.0.1:8000/transfer/get/0x15d34AAf54267DB7D7c367839AAf71A00a2C6A65/
-            getUserTransactionAndTransferData("https://jsonplaceholder.typicode.com/users") // 10
-            console.log('Ay qaaaaaaaaaaa PRODUCTION Transaction')
+            getUserTransactionAndTransferData(`http://127.0.0.1:8000/transaction/get/${currentUserAddress}/`) // 10
+            console.log('Ay qaaa production')
         }
         else if(!loading && server_name=='local' && transaction_type==null){
-            getUserTransactionAndTransferData("https://jsonplaceholder.typicode.com/todos") // 200
+            getUserTransactionAndTransferData(`http://127.0.0.1:8000/transaction/get/${currentUserAddress}/`) // 200
             console.log('Ay broo LOCAL Transaction')            
         }
         else if(transaction_type != 'Transfer'){
-            getUserTransactionAndTransferData("https://jsonplaceholder.typicode.com/albums") //100
+            getUserTransactionAndTransferData(`http://127.0.0.1:8000/transfer/get/${currentUserAddress}/`) //100
             console.log('Demeli bura transferdi')
         }
         else{
-            getUserTransactionAndTransferData("https://jsonplaceholder.typicode.com/comments") // 500
+            getUserTransactionAndTransferData(`http://127.0.0.1:8000/transaction/get/${currentUserAddress}/`) // 200
             console.log('Demeli bura transactiondu')
         }
     }
@@ -122,21 +143,14 @@ export default function ContractTransition(){
         setContractNetwork(deployed_contract.deployeNetwork)
         setserverName(server_name)
 
+
         await getTransactionAndTransferData(server_name)
-    }
-
-
-    
-    //refreshPage
-    const refreshPage = () => {
-        setTimeout(() => {
-            router.reload()
-        }, 2000);
     }
 
 
     //checkNetwork
     if(typeof window !== 'undefined' && typeof window.ethereum !== 'undefined' ){
+        window.ethereum.on('accountsChanged', getContractInformation);
         window.ethereum.on('chainChanged', (chainId) => {
             if(chainId != 0x7a69){
                 axios.put('http://127.0.0.1:8000/server/get/server/name',{server_name: "production"})
@@ -148,6 +162,7 @@ export default function ContractTransition(){
             }
         })
     }
+
 
 
     useEffect(() => {
@@ -173,13 +188,17 @@ export default function ContractTransition(){
 
 
                     Alaaa : {userTransactionAndTransfer.length}
+                    Current Account Is : {account}
 
                     <div className="row mt-4 p-2">
-                        <div className='col'>
-                            Network <span className="text-danger text-capitalize"> : {contractNetwork}</span>
+                        <div className='col-2'>
+                            Network : <span className="text-danger text-capitalize" id='user_network'> {contractNetwork}</span>
                         </div>
-                        <div className='col'>
-                            Address <span className='text-danger'> : {contractAddress}</span>
+                        <div className='col-5'>
+                            User : <span className='text-danger' id='user_address'> {account}</span>
+                        </div>
+                        <div className='col-5'>
+                            Address : <span className='text-danger' id='contract_address'> {contractAddress}</span>
                         </div>
                     </div>
 
