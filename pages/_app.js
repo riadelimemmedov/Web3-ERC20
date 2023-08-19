@@ -24,9 +24,9 @@ function MyApp({Component,pageProps}){
     //jsx
 
     
-    Moralis.start({
-        apiKey:`${process.env.NEXT_PUBLIC_MORALIS_API_KEY}`
-    })
+    // Moralis.start({
+    //     apiKey:`${process.env.NEXT_PUBLIC_MORALIS_API_KEY}`
+    // })
 
     return(
         <>   
