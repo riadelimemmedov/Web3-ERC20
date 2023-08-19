@@ -58,10 +58,10 @@ class TransferGetView(APIView):
     """Return a specific transfer""" 
     
     #get
-    def get(self,request,slug,*args,**kwargs):
+    def get(self,request,transfer_from,*args,**kwargs):
         try:
-            data = get_object_or_404(Transfer,transfer_slug=slug)            
-            serializer = TransferSerializer(data,many=False)
+            data = Transfer.objects.filter(transfer_from=transfer_from)    
+            serializer = TransferSerializer(data,many=True)
             return Response(serializer.data,status=status.HTTP_200_OK)
         except Transfer.DoesNotExist:
                 return Response({'error':'Transfer object not found'},status=status.HTTP_404_NOT_FOUND)

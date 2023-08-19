@@ -50,10 +50,10 @@ class TransactionListCreateView(APIView):
 class TransactionGetView(APIView):
     """Return a specific transaction"""
     
-    def get(self,request,slug,*args,**kwargs):
+    def get(self,request,transaction_from,*args,**kwargs):
         try:
-            data = get_object_or_404(Transaction,transaction_slug=slug)
-            serializer = TransactionSerializer(data,many=False)
+            data = Transaction.objects.filter(transaction_from=transaction_from)
+            serializer = TransactionSerializer(data,many=True)
             return Response(serializer.data,status=status.HTTP_200_OK)
         except Transaction.DoesNotExist:
             return Response({'error':'Transaction object not found'},status=status.HTTP_404_NOT_FOUND)
