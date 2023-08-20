@@ -23,7 +23,7 @@ class TransactionSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = Transaction
-        fields = ['transaction_hash','transaction_from','transaction_to','transaction_amount','is_succsess','confirmations','transaction_id','blockchain_server','token_name','token_symbol','network']
+        fields = ['transaction_hash','transaction_from','transaction_to','transaction_amount','is_succsess','confirmations','transaction_id','blockchain_server','token_name','token_symbol','network','created']
         
     
     #validating transaction_from and transaction_to

@@ -58,9 +58,9 @@ class TransferGetView(APIView):
     """Return a specific transfer""" 
     
     #get
-    def get(self,request,transfer_from,*args,**kwargs):
+    def get(self,request,transfer_from,server_name,*args,**kwargs):
         try:
-            data = Transfer.objects.filter(transfer_from=transfer_from)    
+            data = Transfer.objects.filter(transfer_from=transfer_from,blockchain_server=server_name)    
             serializer = TransferSerializer(data,many=True)
             return Response(serializer.data,status=status.HTTP_200_OK)
         except Transfer.DoesNotExist:

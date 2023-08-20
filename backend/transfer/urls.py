@@ -12,5 +12,5 @@ from .views import *
 app_name = 'transfer'
 urlpatterns = [
     path('create/',TransferListCreateView.as_view(),name='get-create-transfer'),
-    path('get/<str:transfer_from>/',TransferGetView.as_view(),name='get-transfer')
+    path('get/<str:transfer_from>/<str:server_name>/',TransferGetView.as_view(),name='get-transfer')    
 ]

@@ -11,7 +11,7 @@ from .views import *
 app_name = 'transaction'
 urlpatterns = [
     path('create/',TransactionListCreateView.as_view(),name='get-create-transaction'),
-    path('get/<str:transaction_from>/',TransactionGetView.as_view(),name='get-transaction')
+    path('get/<str:transaction_from>/<str:server_name>/',TransactionGetView.as_view(),name='get-transaction')
 ]
 
 

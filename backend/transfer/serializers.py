@@ -26,7 +26,7 @@ class TransferSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = Transfer
-        fields = ['transfer_hash','transfer_from','transfer_to','transfer_amount','is_transfer','confirmations','transfer_id','transfer_approvement','blockchain_server','token_name','token_symbol','network']
+        fields = ['transfer_hash','transfer_from','transfer_to','transfer_amount','is_transfer','confirmations','transfer_id','transfer_approvement','blockchain_server','token_name','token_symbol','network','created']
         
     
     #validating transfer_from and transfer_to
