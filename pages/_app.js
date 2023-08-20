@@ -8,6 +8,10 @@ import { Toaster } from "react-hot-toast";
 import './../css/header.css'
 
 
+//!Custom styles
+import './../css/Pagination.css'
+
+
 //!Next.js
 import Head from "next/head";
 import { useState } from "react";
