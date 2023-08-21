@@ -22,12 +22,10 @@ const mytoken_contract_prod = require('../contracts/my_token_prod.js')
 
 
 
-
-
 //?Transfer
 export default function Transfer(){
-    //state
     
+    //state
     const [owner,setOwner] = useState()
     const [spender,setSpender] = useState()
     const [recipient,setRecipient] = useState()
@@ -39,14 +37,13 @@ export default function Transfer(){
     const [amount_transfer,setAmountTransfer] = useState()
 
 
-
     const [isCompletedApprove,setCompletedApprove] = useState(false)
     const [confirmedApproveAccount,setConfirmedApproveAccount] = useState()
-
 
     const [serverName,setServerName] = useState()
 
 
+    //router
     const router = useRouter();
 
 
@@ -62,12 +59,10 @@ export default function Transfer(){
     if(typeof window !== 'undefined' && typeof window.ethereum !== 'undefined' ){
         window.ethereum.on('chainChanged', (chainId) => {
             if(chainId != 0x7a69){
-                console.log('Work if cyrrently you are production  blocjahin server')
                 axios.put('http://127.0.0.1:8000/server/get/server/name',{server_name: "production"})
                 refreshPage()
             }
             else{
-                console.log('You are currently localhost hrafhat server')
                 axios.put('http://127.0.0.1:8000/server/get/server/name',{server_name: "local"})
                 refreshPage()
             }
@@ -120,10 +115,6 @@ export default function Transfer(){
 
     //saveTransfer
     const saveTransfer = async(transfer_hash,transfer_from,transfer_to,transfer_amount,token_name,token_symbol,network,confirmations) => {
-        console.log('Token name ', token_name)
-        console.log('Token symbol ', token_symbol)
-        console.log('Token network ', network)
-
         await axios.post('http://127.0.0.1:8000/transfer/create/',{            
             "transfer_hash":transfer_hash,
             "transfer_from": transfer_from,
@@ -258,7 +249,6 @@ export default function Transfer(){
                         toast_alert.success('Transfer From process completed successfully')
                     }
                     catch(err){
-                        console.log('Error ',err)
                         toast_alert.error('Occur some error transfer process')
                     }
                 },5000)
