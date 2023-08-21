@@ -26,6 +26,8 @@ export default function CheckUserBalance (props) {
     const [isDisable,setIsDisable] = useState(false)
 
 
+
+    //convertBalance
     const convertBalance = (balance) => {
         const divisor = 1e18; // Dividing by 10^18 to convert to Ether
         const decimalPlaces = 4;
@@ -42,9 +44,7 @@ export default function CheckUserBalance (props) {
             if(metamaskAddressRegex.test(address)){
                 setLoading(true)
                 setTimeout(async(e) => {
-                    // const contract = (await mytoken_contract.deployContract()).contract
                     const server_name = await axios.get('http://127.0.0.1:8000/server/get/server/name').then((response) => response.data.server_name)
-
                     const contract = server_name == 'production' ? await mytoken_contract_prod.deployContractProd() : await mytoken_contract.deployContract()
                     const balance = server_name == 'production' ? await contract.contract.balanceOf(address) : await contract.contract.balanceOf(address); 
                     const formattedBalance = convertBalance(balance)
@@ -69,6 +69,7 @@ export default function CheckUserBalance (props) {
         }
     }
 
+    
     //return jsx
     return(
         <>
