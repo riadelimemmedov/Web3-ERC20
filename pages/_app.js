@@ -19,19 +19,12 @@ import { useState } from "react";
 
 //*Environment variables
 require('dotenv').config()
-const Moralis = require("moralis").default;
-
 
 
 //?MyApp
 function MyApp({Component,pageProps}){
-    //jsx
 
-    
-    // Moralis.start({
-    //     apiKey:`${process.env.NEXT_PUBLIC_MORALIS_API_KEY}`
-    // })
-
+    //return jsx to client
     return(
         <>   
             <Head>
