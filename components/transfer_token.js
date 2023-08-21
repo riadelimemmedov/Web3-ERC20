@@ -18,7 +18,6 @@ const mytoken_contract_prod = require('../contracts/my_token_prod.js')
 
 //?TransferToken
 export default function TransferToken(props){
-    
 
     //state
     const [address,setAddress] = useState('')
@@ -58,6 +57,7 @@ export default function TransferToken(props){
         })
         return true
     }
+
 
     //handleInputValue
     const handleInputValue = (key) => (event) => {
