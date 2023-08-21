@@ -19,9 +19,7 @@ const deployContract = async () => {
     let userBalance = null
     let signer = null
 
-    console.log('Worked else and our contract deploy on localhost')
     signer = ethers.getSigner()
-    console.log('Signer address is ', signer.getAddress())
     contract = new Ethers.Contract(MyTokenLocal.address,MyTokenLocal.abi,signer)
     let ub = await contract.balanceOf((await ethers.getSigner().getAddress()))
     userBalance = ub.toString()
