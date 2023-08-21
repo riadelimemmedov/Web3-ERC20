@@ -7,6 +7,5 @@ from .models import *
 class BlockChainServerModelAdmin(admin.ModelAdmin):
     list_display = ['server_name']
     
-    
 #?register created custom model admin class to django admin interface
 admin.site.register(BlockChainServer,BlockChainServerModelAdmin)
