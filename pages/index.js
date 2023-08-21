@@ -22,7 +22,6 @@ const mytoken_contract_prod = require('../contracts/my_token_prod.js')
 
 
 
-
 //?App
 export default function App(){
 
@@ -34,6 +33,8 @@ export default function App(){
     const [serverName,setServerName] = useState()
     const [chainId,setChainId] = useState()
     
+
+    //router
     const router = useRouter();
 
 
@@ -41,10 +42,7 @@ export default function App(){
     //getContract
     const getContract = async (server_name) => {
         setServerName(server_name)
-        // const deployed_contract = await mytoken_contract.deployContract()
-
         const deployed_contract = server_name == 'production' ? await mytoken_contract_prod.deployContractProd() : await mytoken_contract.deployContract()
-        console.log('Server name index file ', server_name)
     }
 
 
@@ -55,7 +53,6 @@ export default function App(){
         setTokenSymbol(await deployed_contract.contract.symbol())
         setTotalSupply(mytoken_contract.Ethers.utils.formatUnits(await deployed_contract.contract.totalSupply(),18))
     }
-
 
 
     //refreshPage
@@ -70,7 +67,6 @@ export default function App(){
     const checkProdorLocal = async () => {
         if(typeof window !== 'undefined' && typeof window.ethereum !== 'undefined' ){
             window.ethereum.on('chainChanged', (chainId) => {
-                console.log('Chain id is ', chainId)
                 if(chainId != 0x7a69){
                     getContract('production')
                     axios.put('http://127.0.0.1:8000/server/get/server/name',{server_name: "production"})
@@ -90,7 +86,7 @@ export default function App(){
         }
     }
 
-     
+    
     //useEffect
     useEffect(() => {
         checkProdorLocal();
