@@ -19,12 +19,13 @@ import { useMoralis } from 'react-moralis'
 import {toast, toast as toast_alert} from "react-hot-toast";
 import axios from 'axios';
 
-const { getAddress, toChecksumAddress } = require('ethers').utils;
 
+
+//!React paginate
 import ReactPaginate from 'react-paginate';
 
 
-
+//!Material UI
 import Switch from '@mui/material/Switch';
 import FormControlLabel from '@mui/material/FormControlLabel';
 
@@ -35,6 +36,7 @@ import FormControlLabel from '@mui/material/FormControlLabel';
 //?ContractTransition
 export default function ContractTransition(){
 
+    //state
     const [currentUserMetamaskAddress,setcurrentUserMetamaskAddress] = useState()
 
     const [contractAddress, setcontractAddress] = useState()
@@ -43,30 +45,28 @@ export default function ContractTransition(){
 
     const [userTransactionAndTransfer,setUserTransactionAndTransfer] = useState([])
 
-
-
-    const {isWeb3Enabled,account} = useMoralis();
-
-    const router = useRouter();
-
     const [loading, setLoading] = useState(false);
-
 
     const [currentPage, setCurrentPage] = useState(0);
     const [itemOffset, setItemOffset] = useState(0);
 
-    const itemsOwnerToUser = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14];
-    const itemsUserToUser = [15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30];
+
+    const {isWeb3Enabled,account} = useMoralis();
 
 
     //pagination
-    let itemsPerPage = 2
+    let itemsPerPage = 5
     const endOffset = itemOffset + itemsPerPage;
     const currentItems = userTransactionAndTransfer.slice(itemOffset, endOffset)
     const pageCount = Math.ceil(userTransactionAndTransfer.length / itemsPerPage);
 
-    console.log('Page count is ', pageCount);
 
+    //options value for date
+    const options = { year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric'};
+
+
+    //router
+    const router = useRouter();
 
 
     //refreshPage
@@ -76,74 +76,54 @@ export default function ContractTransition(){
         }, 2000);
     }   
 
-    
 
 
-
+    //getUserTransactionAndTransferData
     const getUserTransactionAndTransferData = async (api_url) => {
-        console.log('Qaqasss bunediii ', api_url);
         setUserTransactionAndTransfer([])
         await axios.get(api_url)
             .then((response) => {
-                console.log('Qaqa response geldiee ', response.data)
-                console.log('Qaqa response uzunlug ', response.data.length)
-                setUserTransactionAndTransfer(response.data)
+                setUserTransactionAndTransfer(response.data) ? response.data.length > 0 : null
                 return 
             })
             .catch((err)=>{
-                console.log('Ala errorrr ', err)
+                console.log('Please try again', err)
             })
             
     }
 
 
+
+    //getTransactionAndTransferData
     const getTransactionAndTransferData = async (server_name,transaction_type=null) => {
-        console.log('Get transaction loading value ', loading)
-        console.log('Server name  ', server_name)
-        console.log('User change loading valuee ', transaction_type)
+        let currentUserAddress = mytoken_contract.Ethers.utils.getAddress(document.getElementById('user_address').textContent.trim())        
 
-        let currentUserAddress = mytoken_contract.Ethers.utils.getAddress(document.getElementById('user_address').textContent.trim())
-
-        
-        console.log('Current user address dsadsadsadsadsa ', currentUserAddress)
-        if(currentUserAddress){
-            console.log('First reload pageee returnedd current account address this ', currentUserAddress)
-        }
-
-        
         if(server_name=='production'){
-            // http://127.0.0.1:8000/transaction/get/0xa2f1e30Af99632d6DbC7EBf8b8B9Be5D5Ca13358/production/
-            // http://127.0.0.1:8000/transfer/get/0x15d34AAf54267DB7D7c367839AAf71A00a2C6A65/local/
-
-            // http://127.0.0.1:8000/transaction/get/0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266/
-            // http://127.0.0.1:8000/transfer/get/0x15d34AAf54267DB7D7c367839AAf71A00a2C6A65/
-            getUserTransactionAndTransferData(`http://127.0.0.1:8000/transaction/get/${currentUserAddress}/${server_name}/`) // 10
-            console.log('Ay qaaa production')
+            getUserTransactionAndTransferData(`http://127.0.0.1:8000/transaction/get/${currentUserAddress}/${server_name}/`)
             return
         }
         else if(!loading && server_name=='local' && transaction_type==null){
-            getUserTransactionAndTransferData(`http://127.0.0.1:8000/transaction/get/${currentUserAddress}/${server_name}/`) // 200
-            console.log('Ay broo LOCAL Transaction')    
+            getUserTransactionAndTransferData(`http://127.0.0.1:8000/transaction/get/${currentUserAddress}/${server_name}/`)
             return        
         }
         else if(transaction_type != 'Transfer'){
-            getUserTransactionAndTransferData(`http://127.0.0.1:8000/transfer/get/${currentUserAddress}/${server_name}/`) //100
-            console.log('Demeli bura transferdi')
+            getUserTransactionAndTransferData(`http://127.0.0.1:8000/transfer/get/${currentUserAddress}/${server_name}/`) 
             return
         }
         else{
-            getUserTransactionAndTransferData(`http://127.0.0.1:8000/transaction/get/${currentUserAddress}/${server_name}/`) // 200
-            console.log('Demeli bura transactiondu')
+            getUserTransactionAndTransferData(`http://127.0.0.1:8000/transaction/get/${currentUserAddress}/${server_name}/`) 
             return
         }
     }
 
 
-       // Invoke when user click to request another page.
+
+    // Invoke when user click to request another page.
     const handlePageClick = (event) => {
         const newOffset = (event.selected * itemsPerPage) % userTransactionAndTransfer.length;
         setItemOffset(newOffset);
     };
+
 
 
     //getContract
@@ -157,9 +137,9 @@ export default function ContractTransition(){
         setContractNetwork(deployed_contract.deployeNetwork)
         setserverName(server_name)
 
-
         await getTransactionAndTransferData(server_name)
     }
+
 
 
     //checkNetwork
@@ -179,11 +159,10 @@ export default function ContractTransition(){
 
 
 
+    //useEffect
     useEffect(() => {
         getContractInformation()
     },[])
-
-    const options = { year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric'};
 
 
 
@@ -207,13 +186,6 @@ export default function ContractTransition(){
                 />
                 
                 <hr/>
-
-
-                Alaaa : {userTransactionAndTransfer.length}
-                Current Account Is : {account}
-
-
-                Transactions List - {userTransactionAndTransfer.length}
 
                 <div className="row mt-4 p-2">
                     <div className='col-4'>
@@ -251,7 +223,6 @@ export default function ContractTransition(){
                             </thead>
                             <tbody>
                                 {
-                                    currentItems.length > 0 ? (
                                         currentItems.map((transaction, index) => (
                                             <tr>
                                                 <th scope="row">{transaction.token_name}</th>
@@ -264,23 +235,9 @@ export default function ContractTransition(){
                                                 <td>{String(transaction.is_succsess) == 'true' ? 'Completed' : 'Failed'}</td>
                                             </tr>
                                         )) 
-                                    )
-                                    :
-                                    (
-                                        <th scope="col-12">Not found any transaction history for your account</th>
-                                    )
                                 }
                             </tbody>
                         </table>
-                        <ReactPaginate
-                            pageCount={pageCount} 
-                            pageRangeDisplayed={5} 
-                            marginPagesDisplayed={2} 
-                            onPageChange={handlePageClick} 
-                            containerClassName={'pagination'} 
-                            activeClassName={'active'} 
-                            disabled={true}
-                        />
                     </>
                     )
                     :
@@ -323,13 +280,65 @@ export default function ContractTransition(){
                             </>
                         )
                         :
-                        (
-                            <p className="text-warning">Transfer Local</p>
+
+                            <>
+                                    <p className="text-warning">Transfer Local</p>
+                                        
+                                    <table class="table table-secondary table-striped mt-5">
+                                    <thead>
+                                        <tr>
+                                            <th scope="col">Token Name</th>
+                                            <th scope="col">Token Symbol</th>
+                                            <th scope="col">From Address</th>
+                                            <th scope="col">To Address</th>
+                                            <th scope="col">Network</th>
+                                            <th scope="col">TimeStamp</th>
+                                            <th scope="col">Value</th>
+                                            <th scope="col">Success</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {
+                                            currentItems.map((transfer, index) => (
+                                                <tr>
+                                                    <th scope="row">{transfer.token_name}</th>
+                                                    <td>{transfer.token_symbol}</td>
+                                                    <td>{transfer.transfer_from}</td>
+                                                    <td>{transfer.transfer_to}</td>
+                                                    <td>{transfer.network}</td>
+                                                    <td>{new Date(transfer.created).toLocaleDateString('en-US',options)}</td>
+                                                    <td>{transfer.transfer_amount}</td>
+                                                    <td>{String(transfer.is_transfer) == 'true' ? 'Completed' : 'Failed'}</td>
+                                                </tr>
+                                            )) 
+                                        }
+                                    </tbody>
+                                </table>
+                            </>
                         )
+                }
+
+                {
+
+                    userTransactionAndTransfer.length <= 0 ? (
+                        <div className="alert alert-danger">
+                            Not found any transaction history for this account and current selected network
+                        </div>
+                    )
+                    :
+                    (
+                        <ReactPaginate
+                            pageCount={pageCount} 
+                            pageRangeDisplayed={5} 
+                            marginPagesDisplayed={2} 
+                            onPageChange={handlePageClick} 
+                            containerClassName={'pagination'} 
+                            activeClassName={'active'} 
+                            disabled={true}
+                        />
                     )
                 }
 
-            
             </div>
 
 
