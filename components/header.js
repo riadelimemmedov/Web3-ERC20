@@ -39,6 +39,7 @@ export default function Header(props){
     const router = useRouter()
 
 
+    //convertBalance
     const convertBalance = (balance) => {
         const divisor = 1e18; // Dividing by 10^18 to convert to Ether
         const decimalPlaces = 4;
@@ -54,16 +55,9 @@ export default function Header(props){
         if(isWeb3Enabled && account){
             const getBalance = async () => {
                 const server_name = await axios.get('http://127.0.0.1:8000/server/get/server/name').then((response) => response.data.server_name)
-                console.log('Abiler bunedir bele ', server_name)
-
                 const contract = server_name == 'production' ? await mytoken_contract_prod.deployContractProd() : await mytoken_contract.deployContract()
                 const balance = await contract.contract.balanceOf(account); 
                 const formattedBalance = convertBalance(balance)
-
-                // console.log('Ala nolduu buna balance ', balance)
-
-                console.log('Aaccount balance is ', contract)
-                // const balance1 = await contract.contract.balanceOf(account);
                 setUserBalance(formattedBalance)
             }
             getBalance()
@@ -72,7 +66,7 @@ export default function Header(props){
     }, [isWeb3Enabled,account]);
 
 
-    //jsx
+    //return jsx to client
     return(
         <>
             <div className="d-flex justify-content-between">
